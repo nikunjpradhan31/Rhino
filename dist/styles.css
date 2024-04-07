@@ -1,0 +1,52 @@
+body {
+    background-color: #344D5D;
+  }
+
+#login-container {
+    top: 50px;
+}
+
+#account-box {
+    background-color: #dee4de;
+    top: 50px;
+    padding-bottom: 5px;
+}
+
+#app {
+    padding: 15px;
+    height:100px;
+    display:block;
+}
+
+h1 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 65px;
+    font-family: 'Courier New', Courier, monospace;
+    color: aliceblue;
+  }
+
+#create-account-title {
+    margin-top: 5px;
+    color:#344d5d;
+    font-family: 'Courier New', Courier, monospace;
+
+}
+
+#create-acc-button {
+    background-color:#344D5D; 
+    border-radius: 6px;
+}
+
+#go-to-login {
+    align-self: center;
+    font-size: 13px;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 5px;
+    padding-top: 9px;
+    text-align: center;
+}
+
+
+

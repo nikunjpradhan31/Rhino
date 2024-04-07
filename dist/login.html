@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RhinoHat</title>
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+<body id="LoginPage">
+  <h1>RhinoHat</h1>
+  <div id="app">
+    <div id="account-box" class="account-container">
+      <h2 id="create-account-title">Log In</h2>
+      <form id="create-account-form">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Master Password" required>
+        <button id="create-acc-button" class="login" type="submit">Log In</button>
+      </form>
+      <div id="go-to-login">
+        Don't have an account. Sign up <a href="create_account.html">here</a>.
+      </div>
+    </div>
+  </div>
+
+  <script src="bundle.js"></script>
+</body>
+</html>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const createAccountForm = document.getElementById('create-account-form');
+    createAccountForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      createAccount(username, email, password);
+    });
+  });
+</script>
+
+
+<style>
+    #app {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 65vh;
+    }
+    
+    .account-container {
+      width: 300px;
+      padding: 20px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .account-container h2 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .account-container form {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .account-container form input {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+    
+    .account-container form button {
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    
+    .account-container form button:hover {
+      background-color: #0056b3;
+    }
+  </style>
