@@ -1,0 +1,96 @@
+body {
+  background-color: #344D5D;
+}
+
+#login-container {
+  top: 50px;
+}
+
+#account-box {
+  background-color: #dee4de;
+  top: 50px;
+  padding-bottom: 5px;
+}
+
+#app {
+  padding: 15px;
+  height:100px;
+  display:block;
+}
+
+h1 {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 65px;
+  font-family: 'Courier New', Courier, monospace;
+  color: aliceblue;
+}
+
+#create-account-title {
+  margin-top: 5px;
+  color:#344d5d;
+  font-family: 'Courier New', Courier, monospace;
+
+}
+
+#create-acc-button {
+  background-color:#344D5D; 
+  border-radius: 6px;
+}
+
+#go-to-login {
+  align-self: center;
+  font-size: 13px;
+  font-family: 'Courier New', Courier, monospace;
+  padding: 5px;
+  padding-top: 9px;
+  text-align: center;
+}
+
+
+
+#app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 65vh;
+}
+
+.account-container {
+  width: 300px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.account-container h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.account-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-container form input {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.account-container form button {
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.account-container form button:hover {
+  background-color: #0056b3;
+}
