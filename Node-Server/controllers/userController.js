@@ -58,11 +58,11 @@ const loginUser = async(req, res) => {
 
     try{
         let user = await userModel.findOne({username});
-        if(!user) return res.status(400).json("Invalid email or password");
+        if(!user) return res.status(400).json("Invalid username or password");
 
         const isValidPassword = await bcrypt.compare(password, user.password);
         
-        if(!isValidPassword) return res.status(400).json("Invalid email or password");
+        if(!isValidPassword) return res.status(400).json("Invalid username or password");
 
 
         const token = createToken(user._id);
