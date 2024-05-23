@@ -11,6 +11,9 @@ const registerUser = async (req, res) => {
             return res.status(400).json("All fields are required");
         }
 
+        if(username.length<5){
+            return res.status(400).json("Username is too short");
+        }
         if (!validator.isEmail(email)) {
             return res.status(400).json("Email is not valid");
         }
