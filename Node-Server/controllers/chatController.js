@@ -10,10 +10,10 @@ const createChat = async(req, res) => {
     const {FirstId, SecondId} = req.body;
     //find if the chat already exists
     try{
-        const chat = await chatModel.findOne({members: {$all: [firstId, secondId]}});
+        const chat = await chatModel.findOne({members: {$all: [FirstId, SecondId]}});
         if(chat) return res.status(200).json(chat);
 
-        const newChat = new chatModel({members : [firstId,SecondId]});
+        const newChat = new chatModel({members : [FileListirstId,SecondId]});
         const response = await newChat.save()
         res.status(200).json(response);
 
@@ -25,10 +25,10 @@ const createChat = async(req, res) => {
 }
 //return all the chats of a user
 const getUsersChats = async(req, res) => {
-    const userID = req.params.userID;
+    const userId = req.params.userId;
     try{
         const chats = await chatModel.find({
-            members: {$in: [userID]}
+            members: {$in: [userId]}
         })
     res.status(200).json(chats);
     }catch(error){
@@ -41,13 +41,13 @@ const getUsersChats = async(req, res) => {
 const findChat = async(req,res) => {
     const {FirstId,SecondId} = req.params;
     try{
-        const chats = await chatModel.find({
+        const chat = await chatModel.findOne({
             members: {$all: [FirstId,SecondId]},
         });
-    res.status(200).json(chats);
+    res.status(200).json(chat);
     }catch(error){
         res.status(500).json(error);
     }
 }
 
-module.exports = {createChat, getUsersChats};
+module.exports = {createChat, getUsersChats, findChat};
