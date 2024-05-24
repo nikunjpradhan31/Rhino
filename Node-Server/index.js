@@ -4,6 +4,7 @@ const cors = require("cors"); // allows communication from frontend
 const mongoose = require("mongoose"); //library to communicate to the database
 const userRoute = require("./routes/userRoute");
 const chatRoute = require("./routes/chatRoutes");
+const messageRoute = require("./routes/messageRoutes");
 
 const app = express(); //creation of application
 require("dotenv").config(); //allows access to the enviorment variables
@@ -14,6 +15,8 @@ app.use(express.json());
 app.use(cors());
 app.use("/api/users", userRoute);
 app.use("/api/chats", chatRoute);
+app.use("/api/messages", messageRoute);
+
 
 app.get("/", (req, res) => {
     res.send("API Test");
