@@ -13,7 +13,7 @@ const createChat = async(req, res) => {
         const chat = await chatModel.findOne({members: {$all: [FirstId, SecondId]}});
         if(chat) return res.status(200).json(chat);
 
-        const newChat = new chatModel({members : [FileListirstId,SecondId]});
+        const newChat = new chatModel({members : [FirstId,SecondId]});
         const response = await newChat.save()
         res.status(200).json(response);
 

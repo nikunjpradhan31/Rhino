@@ -23,7 +23,6 @@ const [loginInfo, setLoginInfo] = useState({
 
 });
 
-console.log("users", loginInfo);
 useEffect(()=>{
     const user = localStorage.getItem("User");
     setUser(JSON.parse(user));
