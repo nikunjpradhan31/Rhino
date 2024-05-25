@@ -5,10 +5,13 @@ const validator = require("validator");
 
 const registerUser = async (req, res) => { 
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, confirmpassword } = req.body;
 
         if (!username || !email || !password) {
             return res.status(400).json("All fields are required");
+        }
+        if(confirmpassword != password){
+            return res.status(400).json("Passwords must be the same")
         }
 
         if(username.length<5){

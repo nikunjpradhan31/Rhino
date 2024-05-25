@@ -10,7 +10,7 @@ const NavBar  = () => {
     return (  
 <Navbar className='mb-4' 
     style={{ height: "7rem",
-             background: "#30275a"
+             background: "#060550"
 
     }}>
         <Container>

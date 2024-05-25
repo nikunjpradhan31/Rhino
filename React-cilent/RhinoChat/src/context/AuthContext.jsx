@@ -12,6 +12,7 @@ const [registerInfo, setRegisterInfo] = useState({
     username: "",
     email: "",
     password: "",
+    confirmpassword: "",
 
 });
 
