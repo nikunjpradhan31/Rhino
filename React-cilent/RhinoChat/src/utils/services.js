@@ -1,7 +1,6 @@
 export const baseUrl = "http://localhost:5000/api";
 
 export const postRequest = async (url, body) => {
-    console.log("body",body);
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -33,6 +32,21 @@ export const getRequest = async (url) => {
 
     if (!response.ok) {
         let message = "Unable to fetch chat...";
+
+        if (data?.message) {
+            message = data.message;
+        }
+        return { error: true, message };
+    }
+
+    return data;
+};
+export const getRequestUser = async (url) => {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+        let message = "User does not exist...";
 
         if (data?.message) {
             message = data.message;

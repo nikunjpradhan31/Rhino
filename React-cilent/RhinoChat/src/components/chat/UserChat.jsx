@@ -3,7 +3,6 @@ import { Stack } from "react-bootstrap";
 
 const UserChat = ({chat,user}) => {
     const {otherUser} = useFetchOtherUser(chat,user);
-    console.log(otherUser);
     return ( 
     <Stack direction="horizontal" className =" d-flex user-card align-items-center p-2 justify-content-between">
             <div className="text-content">

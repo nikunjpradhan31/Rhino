@@ -3,6 +3,8 @@ import { ChatContext } from "../context/ChatContext";
 import { Container, Stack } from "react-bootstrap";
 import UserChat from "../components/chat/UserChat";
 import { AuthContext } from "../context/AuthContext";
+import SearchOtherUsers from "../components/chat/FIndUser";
+
 
 
 const ChatPage = () => {
@@ -11,9 +13,9 @@ const ChatPage = () => {
 
     return ( 
     <Container>
-        {userChats?.length < 1 ? null : ( 
         <Stack direction = "horizontal" gap = {4} className="align-items-start" role="button">
-            <Stack className="messages-box flex-grow-0 pe-3" gap={4}>
+            <Stack className="messages-box flex-grow-0 pe-3" gap={3}>
+                <SearchOtherUsers/>
             {isUserChatsLoading && <p>Retrieving Chats...</p>}
             {userChats?.map((chat,index)=>{
                 return(
@@ -24,7 +26,7 @@ const ChatPage = () => {
             })}
             </Stack>
             ChatBox
-        </Stack>)}
+        </Stack>
     </Container> 
     );
 };

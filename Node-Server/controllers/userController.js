@@ -90,6 +90,22 @@ const findUser = async(req,res) => {
     }
 };
 
+const findSingleUser = async(req,res) => {
+    const username = req.params.username;
+    try{
+        const user = await userModel.findOne({ username });
+        if(!user){
+           return res.status(400).json("User does not exist");
+        }
+        return res.status(200).json(user);
+    }
+    catch(error){
+        console.log("Error",error);
+        return res.status(500).json(error);
+
+    }
+};
+
 const getUsers = async(req,res) => {
     try{
         const user = await userModel.find();
@@ -100,4 +116,4 @@ const getUsers = async(req,res) => {
 
     }
 };
-module.exports = { registerUser, loginUser, findUser, getUsers};
+module.exports = { registerUser, loginUser, findUser, getUsers, findSingleUser};
