@@ -15,8 +15,8 @@ export const useFetchOtherUser = (chat,user) => {
             }
             setOtherUser(response);
 
-        }
+        };
         getUser();
-    },[]);
-    return {otherUser, error}
+    },[otherUser_Id]);
+    return {otherUser, error};
 };

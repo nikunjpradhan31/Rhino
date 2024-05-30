@@ -56,7 +56,53 @@ export const ChatContextProvider = ({children,user}) => {
     }
     },[])
 
+    const [ currentChat, setCurrentChat] = useState(null);
 
-    return (<ChatContext.Provider value = {{userChats, isUserChatsLoading,setUserChatsError,userChatError, newUserError,
-        isNewUserLoading,otherUser,findNewUser,createChat}}>{children}</ChatContext.Provider>);
+    const updateCurrentChat = useCallback((chat)=>{
+        setCurrentChat(chat);
+    },[]);
+
+    const [messages, Setmessages] = useState(null);
+    const [isMessagesLoading,setMessagesLoading] = useState(false);
+    const [messagesError, setMessagesError] = useState(null);
+
+    useEffect(()=>{
+        const getMessages = async()=>{
+            setMessagesLoading(true);
+            setMessagesError(null);
+                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
+                setMessagesLoading(false);
+                if(response.error){
+                    return setMessagesError(response);
+                }
+                Setmessages(response);
+        }
+        getMessages();
+
+    },[currentChat]);
+
+    const [sendTextMessageError, setTextMessageError] = useState(null);
+    const [newMessage, setNewMessage] = useState(null);
+
+    const sendMessage = useCallback( async (textMessage, sender, currentChatId, setTextMessage)=> {
+        if(!textMessage) return;
+
+        const response = await postRequest(`${baseUrl}/messages`, JSON.stringify({
+            senderId: sender._id,
+            text: textMessage,
+            chatId: currentChatId
+        }))
+        if(response.error){
+            return setTextMessageError(response);
+        }
+        setNewMessage(response);
+        Setmessages((prev)=>[...prev, response]);
+        setTextMessage("");
+
+
+
+    },[]);
+
+    return (<ChatContext.Provider value = {{userChats, isUserChatsLoading ,userChatError, newUserError,
+        isNewUserLoading,otherUser,findNewUser,createChat, updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage}}>{children}</ChatContext.Provider>);
 }
