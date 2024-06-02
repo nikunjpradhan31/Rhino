@@ -1,13 +1,71 @@
 import { createContext , useState, useEffect, useCallback} from "react";
 import { baseUrl, getRequest, postRequest , getRequestUser} from "../utils/services";
 import {Container, Stack} from "react-bootstrap";
+import { io } from "socket.io-client";
 export const ChatContext = createContext();
 
 export const ChatContextProvider = ({children,user}) => {
     const [userChats, setUserChats] = useState(null);
     const [isUserChatsLoading, setIsUserChatsLoading] = useState(false);
     const [userChatError, setUserChatsError] = useState(null);
-    
+    const [newUserError, setNewUserError] = useState(null);
+    const [isNewUserLoading, setIsNewUserLoading] = useState(false);
+    const [otherUser, setOtherUser] = useState(null);
+    const [ currentChat, setCurrentChat] = useState(null);
+    const [messages, Setmessages] = useState(null);
+    const [isMessagesLoading,setMessagesLoading] = useState(false);
+    const [messagesError, setMessagesError] = useState(null);
+    const [sendTextMessageError, setTextMessageError] = useState(null);
+    const [newMessage, setNewMessage] = useState(null);
+
+    const [socket, setSocket] = useState(null);
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    console.log("onlineUsers",onlineUsers);
+    useEffect (()=> {
+        const newSocket = io("http://localhost:3000");
+        setSocket(newSocket);
+        return () =>{
+            newSocket.disconnect();
+        };
+    },[user]);
+
+    //online users through socket
+    useEffect(()=>{
+        if(socket === null) return;
+        socket.emit("addNewUser",user?._id);
+        socket.on("getOnlineUsers", (response)=>{
+            setOnlineUsers(response);
+        });
+        return () =>{
+            socket.off("getOnlineUsers");
+        };
+    },[socket]);
+
+    //send a message through socket
+    useEffect(()=>{
+        if(socket === null) return;
+
+        const otherUserId = currentChat?.members?.find((id)=> id!== user?._id);
+        socket.emit("sendMessage",{...newMessage, otherUserId});
+
+    },[newMessage]);
+
+    //receive message through socket
+
+    useEffect(()=>{
+        if(socket === null) return;
+
+        socket.on("getMessage", response =>{
+            if(currentChat?._id !== response.chatId) return
+            Setmessages((prev) =>[...prev, response])
+        });
+
+        return () =>{
+            socket.off("getMessage");
+        }
+
+    },[socket,currentChat]);
+
     useEffect(()=>{
         const getUserChats = async()=>{
             if(user?._id){
@@ -24,9 +82,7 @@ export const ChatContextProvider = ({children,user}) => {
         getUserChats();
     },[user]);
 
-    const [newUserError, setNewUserError] = useState(null);
-    const [isNewUserLoading, setIsNewUserLoading] = useState(false);
-    const [otherUser, setOtherUser] = useState(null);
+
 ///fix ERROR with bad request
     const findNewUser = useCallback(async (username) => {
         setIsNewUserLoading(true);
@@ -56,15 +112,9 @@ export const ChatContextProvider = ({children,user}) => {
     }
     },[])
 
-    const [ currentChat, setCurrentChat] = useState(null);
-
     const updateCurrentChat = useCallback((chat)=>{
         setCurrentChat(chat);
     },[]);
-
-    const [messages, Setmessages] = useState(null);
-    const [isMessagesLoading,setMessagesLoading] = useState(false);
-    const [messagesError, setMessagesError] = useState(null);
 
     useEffect(()=>{
         const getMessages = async()=>{
@@ -80,9 +130,6 @@ export const ChatContextProvider = ({children,user}) => {
         getMessages();
 
     },[currentChat]);
-
-    const [sendTextMessageError, setTextMessageError] = useState(null);
-    const [newMessage, setNewMessage] = useState(null);
 
     const sendMessage = useCallback( async (textMessage, sender, currentChatId, setTextMessage)=> {
         if(!textMessage) return;
@@ -104,5 +151,5 @@ export const ChatContextProvider = ({children,user}) => {
     },[]);
 
     return (<ChatContext.Provider value = {{userChats, isUserChatsLoading ,userChatError, newUserError,
-        isNewUserLoading,otherUser,findNewUser,createChat, updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage}}>{children}</ChatContext.Provider>);
+        isNewUserLoading,otherUser,findNewUser,createChat, updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage, onlineUsers}}>{children}</ChatContext.Provider>);
 }

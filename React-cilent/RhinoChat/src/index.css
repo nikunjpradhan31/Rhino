@@ -23,11 +23,11 @@ body{
   .user-card {
     position: relative;
     border-bottom: 1px solid rgb(100, 100, 100);
-    width: 380px;
+    width: auto;
   }
   
   .user-card .text-content {
-    width: 170px;
+    width: auto;
   }
   
   .user-card .name {
@@ -36,7 +36,7 @@ body{
   
   .user-card .text,
   .user-card .date {
-    font-size: 14px;
+    font-size: 1.5vh;
     color: rgb(180, 180, 180);
   }
   
@@ -57,7 +57,7 @@ body{
     max-height: calc(100vh - 10rem);
     overflow-y: auto;
     background: rgb(25, 25, 25);
-    border-radius: 10px;
+    border-radius: 5vh;
   }
   
   .messages-box {

@@ -13,7 +13,7 @@ const Login = () => {
                             <Form.Control type="text" placeholder="Enter your username..." onChange={(e)=>updateLoginInfo({...loginInfo, username: e.target.value})}/>
                             <Form.Control type="password" placeholder="Enter your password..." onChange={(e)=>updateLoginInfo({...loginInfo, password: e.target.value})}/>
                             <Button variant="primary" type="submit">
-                            {isLoginLoading ? "Logining in...": "Login"}
+                            {isLoginLoading ? "Logging in...": "Login"}
                             </Button>
                             {
                     LoginError?.error && (<Alert variant="danger"><p>{LoginError?.message}</p></Alert>)
