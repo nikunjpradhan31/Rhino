@@ -10,7 +10,6 @@ router.get("/find/:userId", findUser);
 
 router.get("/findsingle/:username", findSingleUser);
 
-
 router.get("/",getUsers);
 
 module.exports = router;

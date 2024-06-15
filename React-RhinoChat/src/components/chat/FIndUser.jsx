@@ -6,8 +6,9 @@ import ErrorModal from '../ErrorModal';
 const SearchOtherUsers = () => {
     const {user} = useContext(AuthContext);
     const [username, setUsername] = useState("");
-    const {findNewUser, newUserError, isNewUserLoading, otherUser,createChat,userChats } = useContext(ChatContext);
+    const {findNewUser, newUserError, isNewUserLoading, otherUser,createChat,userChats,allUsers } = useContext(ChatContext);
     const [modalOpen, setModalOpen] = useState(false);  // State to manage modal visibility
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
     const handleInputChange = (e) => {
         setUsername(e.target.value);
@@ -19,6 +20,19 @@ const SearchOtherUsers = () => {
           setUsername("");
         }
       };
+
+      useEffect(() => {
+        if (username.trim()) {
+            const filtered = allUsers.filter(user =>
+                user.username.toLowerCase().includes(username.toLowerCase())
+            );
+            setFilteredUsers(filtered);
+        } else {
+            setFilteredUsers([]);
+        }
+    }, [username, allUsers]);
+
+    
       useEffect(() => {
         if (otherUser && user) {
             // const isExistingChat = userChats?.some(chat => 
@@ -62,6 +76,20 @@ const SearchOtherUsers = () => {
                 Search
             </Button>
         </InputGroup>
+        {filteredUsers.length > 0 && (
+    <ul className="list-group">
+        {filteredUsers.map(user => (
+            <li
+                key={user._id}
+                className="list-group-item"
+                onClick={() => setUsername(user.username)}
+                style={{ cursor: 'pointer' }}
+            >
+                {user.username}
+            </li>
+        ))}
+    </ul>
+)}
     </>
 );
 }

@@ -17,6 +17,9 @@ export const ChatContextProvider = ({children,user}) => {
     const [messagesError, setMessagesError] = useState(null);
     const [sendTextMessageError, setTextMessageError] = useState(null);
     const [newMessage, setNewMessage] = useState(null);
+    const [allUsers, setAllUsers] = useState([]);
+    const [isAllUsersLoading, setIsAllUsersLoading] = useState(false);
+    const [allUsersError, setAllUsersError] = useState(null);
 
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
@@ -81,6 +84,26 @@ export const ChatContextProvider = ({children,user}) => {
         }
         getUserChats();
     },[user]);
+
+
+
+    
+        const fetchAllUsers = useCallback(async () => {
+            setIsAllUsersLoading(true);
+            setAllUsersError(null);
+            const response = await getRequest(`${baseUrl}/users/`);
+            setIsAllUsersLoading(false);
+            if (response.error) {
+                return setAllUsersError(response);
+            }
+            setAllUsers(response);
+        }, []);
+    
+        useEffect(() => {
+            fetchAllUsers();
+        }, [fetchAllUsers]);
+    
+
 
 
     const findNewUser = useCallback(async (username) => {
@@ -175,5 +198,5 @@ export const ChatContextProvider = ({children,user}) => {
     },[]);
 
     return (<ChatContext.Provider value = {{userChats, isUserChatsLoading ,userChatError, newUserError,
-        isNewUserLoading,otherUser,findNewUser,createChat, updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage, onlineUsers, AddToChat}}>{children}</ChatContext.Provider>);
+        isNewUserLoading,otherUser,findNewUser,createChat, updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage, onlineUsers, AddToChat, allUsers}}>{children}</ChatContext.Provider>);
 }
