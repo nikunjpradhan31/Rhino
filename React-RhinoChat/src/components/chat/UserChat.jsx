@@ -4,14 +4,28 @@ import { Stack } from "react-bootstrap";
 import { ChatContext } from "../../context/ChatContext";
 
 const UserChat = ({chat,user}) => {
-    const {otherUser} = useFetchOtherUser(chat,user);
+    const {otherUsers} = useFetchOtherUser(chat,user);
     const {onlineUsers} = useContext(ChatContext);
-    const isOnline = onlineUsers?.some((user) => user?.userId === otherUser?._id);
+    const isOnline = onlineUsers?.some((user) => user?.userId === otherUsers?._id);
     return ( 
     <Stack direction="horizontal" className =" d-flex user-card align-items-center p-2 justify-content-between "role="button" tabIndex={0}>
             <div className="text-content ">
-                <div className="name">{otherUser?.username}</div>
-                <div className="text">Hello. How are you?</div>
+            <div className="name">
+                {Array.isArray(otherUsers) && otherUsers.length > 0 && !chat.is_group 
+                    ? otherUsers.map(user => <span key={user._id}>{user.username}</span>)
+                    : chat.is_group && chat.chatTitle 
+                        ? chat.chatTitle 
+                        : Array.isArray(otherUsers) && otherUsers.length > 0
+                            ? otherUsers.map((user, index) => (
+                                <span key={user._id}>
+                                    {user.username}
+                                    {index < otherUsers.length - 1 && ", "}
+                                </span>
+                            ))
+                            : null
+                }
+            </div>
+            <div className="text">Hello. How are you?</div>
             </div>
             <div className="d-flex flex-column align-items-end ">
                 <div className="date">

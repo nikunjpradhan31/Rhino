@@ -5,6 +5,7 @@ const mongoose = require("mongoose"); //library to communicate to the database
 const userRoute = require("./routes/userRoute");
 const chatRoute = require("./routes/chatRoutes");
 const messageRoute = require("./routes/messageRoutes");
+const chatModel = require("./models/ChatModel");
 
 const app = express(); //creation of application
 require("dotenv").config(); //allows access to the enviorment variables

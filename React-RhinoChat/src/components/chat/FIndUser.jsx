@@ -6,9 +6,8 @@ import ErrorModal from '../ErrorModal';
 const SearchOtherUsers = () => {
     const {user} = useContext(AuthContext);
     const [username, setUsername] = useState("");
-    const { findNewUser, newUserError, isNewUserLoading, otherUser,createChat,userChats } = useContext(ChatContext);
+    const {findNewUser, newUserError, isNewUserLoading, otherUser,createChat,userChats } = useContext(ChatContext);
     const [modalOpen, setModalOpen] = useState(false);  // State to manage modal visibility
-
 
     const handleInputChange = (e) => {
         setUsername(e.target.value);
@@ -22,10 +21,14 @@ const SearchOtherUsers = () => {
       };
       useEffect(() => {
         if (otherUser && user) {
+            // const isExistingChat = userChats?.some(chat => 
+            //     chat.members.indexOf(otherUser._id) !== -1
+            // );
             const isExistingChat = userChats?.some(chat => 
-                chat.members.indexOf(otherUser._id) !== -1
+                chat.members.length === 2 && 
+                chat.members.includes(user._id) && 
+                chat.members.includes(otherUser._id)
             );
-
             if (!isExistingChat) {
                 createChat(user._id, otherUser._id);
             }        }

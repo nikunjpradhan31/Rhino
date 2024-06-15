@@ -84,7 +84,7 @@ const findUser = async(req,res) => {
         const user = await userModel.findById(userId);
         res.status(200).json(user);
     }
-    catch{
+    catch(error){
         res.status(500).json(error);
 
     }
