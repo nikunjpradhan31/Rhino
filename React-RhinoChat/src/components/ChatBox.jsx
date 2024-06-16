@@ -15,7 +15,7 @@ const ChatBox = () => {
     if(isMessagesLoading){ return(<p style={{ textAlign:"center", width: "100%"}}>Retrieving conversation...</p>);}
     return (
     <>
-    <Stack gap = {4} className="chat-box">
+    <Stack  className="chat-box">
     <div className="chat-header">
     <>
     {(() => {

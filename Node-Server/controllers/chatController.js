@@ -6,50 +6,50 @@ const chatModel = require("../models/ChatModel");
 
 
 //creating a new chat between two users
-const createChat = async(req, res) => {
-    const {FirstId, SecondId} = req.body;
-    //find if the chat already exists
-    try{
-        const chat = await chatModel.findOne({
-            members: { $all: [FirstId, SecondId], $size: 2 }, is_group: false
-        });
-        if(chat) return res.status(200).json(chat);
-        console.log("newchat");
-        const newChat = new chatModel({members : [FirstId,SecondId]});
-        const response = await newChat.save()
-        res.status(200).json(response);
-
-
-    }
-    catch(error){
-        res.status(500).json(error)
-    }
-}
-
-// const createChat = async (req, res) => {
-//     const { members } = req.body; // Expecting an array of strings
-//     if (members.length < 2) {
-//         return res.status(400).json({ error: 'members must be an array with at least two user IDs' });
-//     }
-//     let isgroup = false;
-//     if(members.length > 2){
-//         isgroup = true;
-//     }
-
-//     try {
-//         // Find if the chat already exists with the same set of members
-//         const chat = await chatModel.findOne({ members: { $all: members, $size: members.length } });
-//         if (chat) return res.status(200).json(chat);
-
-//         // Create a new chat with the given members
-
-//         const newChat = new chatModel({ members: members, is_group: isgroup });
-//         const response = await newChat.save();
+// const createChat = async(req, res) => {
+//     const {FirstId, SecondId} = req.body;
+//     //find if the chat already exists
+//     try{
+//         const chat = await chatModel.findOne({
+//             members: { $all: [FirstId, SecondId], $size: 2 }, is_group: false
+//         });
+//         if(chat) return res.status(200).json(chat);
+//         console.log("newchat");
+//         const newChat = new chatModel({members : [FirstId,SecondId]});
+//         const response = await newChat.save()
 //         res.status(200).json(response);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
+
+
 //     }
-// };
+//     catch(error){
+//         res.status(500).json(error)
+//     }
+// }
+
+const createChat = async (req, res) => {
+    const { members } = req.body; // Expecting an array of strings
+    if (members.length < 2) {
+        return res.status(400).json({ error: 'members must be an array with at least two user IDs' });
+    }
+    let isgroup = false;
+    if(members.length > 2){
+        isgroup = true;
+    }
+
+    try {
+        // Find if the chat already exists with the same set of members
+        const chat = await chatModel.findOne({ members: { $all: members, $size: members.length } });
+        if (chat) return res.status(200).json(chat);
+
+        // Create a new chat with the given members
+
+        const newChat = new chatModel({ members: members, is_group: isgroup });
+        const response = await newChat.save();
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 //return all the chats of a user

@@ -1,27 +1,39 @@
-import React, { useState,useContext,useEffect  } from 'react';
-import { Form, Button, InputGroup,Stack } from 'react-bootstrap';
+import React, { useState, useContext, useEffect } from 'react';
+import { Form, Button, InputGroup, Stack } from 'react-bootstrap';
 import { ChatContext } from '../../context/ChatContext';
 import { AuthContext } from '../../context/AuthContext';
 import ErrorModal from '../ErrorModal';
-const SearchOtherUsers = () => {
-    const {user} = useContext(AuthContext);
-    const [username, setUsername] = useState("");
-    const {findNewUser, newUserError, isNewUserLoading, otherUser,createChat,userChats,allUsers } = useContext(ChatContext);
-    const [modalOpen, setModalOpen] = useState(false);  // State to manage modal visibility
-    const [filteredUsers, setFilteredUsers] = useState([]);
 
+const SearchOtherUsers = () => {
+    const { user } = useContext(AuthContext);
+    const {isNewUserLoading, createChat, userChats, allUsers } = useContext(ChatContext);
+
+    const [username, setUsername] = useState("");
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
     const handleInputChange = (e) => {
         setUsername(e.target.value);
-      };
+    };
     const handleSearchClick = async (e) => {
         e.preventDefault();
-        if (username.trim()) {
-          await findNewUser(username);
-          setUsername("");
+        if (selectedUsers.length > 0 && user) {
+            const selectedUserIds = selectedUsers.map(user => user._id);
+            const isExistingChat = userChats?.some(chat =>
+                chat.members.length === selectedUsers.length + 1 &&
+                chat.members.includes(user?._id) &&
+                selectedUserIds.every(id => chat.members.includes(id))
+            );
+            if (!isExistingChat) {
+                const members = [...selectedUserIds, user?._id];
+                console.log(members);
+                createChat(members);
+            }
+            setUsername("");
+            setSelectedUsers([]);
         }
-      };
+    };
 
-      useEffect(() => {
+    useEffect(() => {
         if (username.trim()) {
             const filtered = allUsers.filter(user =>
                 user.username.toLowerCase().includes(username.toLowerCase())
@@ -32,66 +44,66 @@ const SearchOtherUsers = () => {
         }
     }, [username, allUsers]);
 
-    
-      useEffect(() => {
-        if (otherUser && user) {
-            // const isExistingChat = userChats?.some(chat => 
-            //     chat.members.indexOf(otherUser._id) !== -1
-            // );
-            const isExistingChat = userChats?.some(chat => 
-                chat.members.length === 2 && 
-                chat.members.includes(user._id) && 
-                chat.members.includes(otherUser._id)
-            );
-            if (!isExistingChat) {
-                createChat(user._id, otherUser._id);
-            }        }
-    }, [otherUser, user, createChat,userChats]);
 
+    const handleUserSelect = (user) => {
+        setSelectedUsers(prevSelectedUsers => 
+            prevSelectedUsers.some(selectedUser => selectedUser._id === user._id)
+                ? prevSelectedUsers
+                : [...prevSelectedUsers, user]
+        );        setUsername("");
 
-    useEffect(() => {
-        if (newUserError?.error) {
-          setModalOpen(true);  // Assuming setModalOpen is defined; if not, define it similarly to newUserError
-        }
-      }, [newUserError]);
-    
-      const handleCloseModal = () => {
-        setModalOpen(false);  // Function to close the modal and potentially clear errors if needed
     };
 
-    return (      
-    <>
-            {newUserError?.error && (
-                <ErrorModal show={modalOpen} onHide={handleCloseModal} />
-            )}
-        <InputGroup className="mb-3">
-            <Form.Control
-                type="text"
-                placeholder={isNewUserLoading ? "Retrieving user..." : "Search Users"}
-                value={username}
-                onChange={handleInputChange}
+    const handleUserRemove = (userId) => {
+        setSelectedUsers(prevSelectedUsers =>
+            prevSelectedUsers.filter(user => user._id !== userId)
+        );
+    };
 
-            />
-            <Button variant="primary" onClick={handleSearchClick} >
-                Search
-            </Button>
-        </InputGroup>
-        {filteredUsers.length > 0 && (
-    <ul className="list-group">
-        {filteredUsers.map(user => (
-            <li
-                key={user._id}
-                className="list-group-item"
-                onClick={() => setUsername(user.username)}
-                style={{ cursor: 'pointer' }}
-            >
-                {user.username}
-            </li>
-        ))}
-    </ul>
-)}
-    </>
-);
-}
- 
+    return (
+        <Stack direction='horizontal'>
+        <Stack direction= "horizontal">
+            <InputGroup className="mb-3" style={{width: '30vh'}}>
+                <Form.Control
+                    type="text"
+                    placeholder={isNewUserLoading ? "Retrieving user..." : "Search Users"}
+                    value={username}
+                    onChange={handleInputChange}
+                />
+                <Button
+                    variant="primary"
+                    onClick={handleSearchClick}
+                    disabled={selectedUsers.length === 0}
+                >
+                    Search
+                </Button>
+                {filteredUsers.length > 0 && (
+                <ul className="list-group" style={{width: '30vh'}}>
+                    {filteredUsers.map(user => (
+                        <li
+                            key={user._id}
+                            className="list-group-item"
+                            onClick={() => handleUserSelect(user)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {user.username}
+                        </li>
+                    ))}
+                </ul>
+            )}
+            </InputGroup>
+            </Stack>
+            <Stack direction = "vertical" style={{flexDirection: 'row'}}>
+                {selectedUsers.map(user => (
+                    <div key={user._id} className="single-user" onClick={() => handleUserRemove(user._id)}
+>
+                        {user.username}
+                    </div>
+                ))}
+            </Stack>
+
+        </Stack>
+    );
+};
+
 export default SearchOtherUsers;

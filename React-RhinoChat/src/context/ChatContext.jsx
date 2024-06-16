@@ -23,51 +23,50 @@ export const ChatContextProvider = ({children,user}) => {
 
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
-    // console.log("onlineUsers",onlineUsers);
-    // useEffect (()=> {
-    //     const newSocket = io("http://localhost:3000");
-    //     setSocket(newSocket);
-    //     return () =>{
-    //         newSocket.disconnect();
-    //     };
-    // },[user]);
+    useEffect (()=> {
+        const newSocket = io("http://localhost:3000");
+        setSocket(newSocket);
+        return () =>{
+            newSocket.disconnect();
+        };
+    },[user]);
 
-    // //online users through socket
-    // useEffect(()=>{
-    //     if(socket === null) return;
-    //     socket.emit("addNewUser",user?._id);
-    //     socket.on("getOnlineUsers", (response)=>{
-    //         setOnlineUsers(response);
-    //     });
-    //     return () =>{
-    //         socket.off("getOnlineUsers");
-    //     };
-    // },[socket]);
+    //online users through socket
+    useEffect(()=>{
+        if(socket === null) return;
+        socket.emit("addNewUser",user?._id);
+        socket.on("getOnlineUsers", (response)=>{
+            setOnlineUsers(response);
+        });
+        return () =>{
+            socket.off("getOnlineUsers");
+        };
+    },[socket]);
 
-    // //send a message through socket
-    // useEffect(()=>{
-    //     if(socket === null) return;
+    //send a message through socket
+    useEffect(()=>{
+        if(socket === null) return;
 
-    //     const otherUserId = currentChat?.members?.find((id)=> id!== user?._id);
-    //     socket.emit("sendMessage",{...newMessage, otherUserId});
+        const otherUserId = currentChat?.members?.find((id)=> id!== user?._id);
+        socket.emit("sendMessage",{...newMessage, otherUserId});
 
-    // },[newMessage]);
+    },[newMessage]);
 
     // //receive message through socket
 
-    // useEffect(()=>{
-    //     if(socket === null) return;
+    useEffect(()=>{
+        if(socket === null) return;
 
-    //     socket.on("getMessage", response =>{
-    //         if(currentChat?._id !== response.chatId) return
-    //         Setmessages((prev) =>[...prev, response])
-    //     });
+        socket.on("getMessage", response =>{
+            if(currentChat?._id !== response.chatId) return
+            Setmessages((prev) =>[...prev, response])
+        });
 
-    //     return () =>{
-    //         socket.off("getMessage");
-    //     }
+        return () =>{
+            socket.off("getMessage");
+        }
 
-    // },[socket,currentChat]);
+    },[socket,currentChat]);
 
     useEffect(()=>{
         const getUserChats = async()=>{
@@ -85,9 +84,6 @@ export const ChatContextProvider = ({children,user}) => {
         getUserChats();
     },[user]);
 
-
-
-    
         const fetchAllUsers = useCallback(async () => {
             setIsAllUsersLoading(true);
             setAllUsersError(null);
@@ -96,15 +92,14 @@ export const ChatContextProvider = ({children,user}) => {
             if (response.error) {
                 return setAllUsersError(response);
             }
-            setAllUsers(response);
-        }, []);
-    
+            const filteredUsers = response.filter(u => u._id !== user?._id);
+
+            setAllUsers(filteredUsers);
+        }, [user]);
         useEffect(() => {
             fetchAllUsers();
         }, [fetchAllUsers]);
     
-
-
 
     const findNewUser = useCallback(async (username) => {
         setIsNewUserLoading(true);
@@ -121,6 +116,25 @@ export const ChatContextProvider = ({children,user}) => {
           }
 
       }, []);
+    // const findNewUsers = useCallback(async (usernames) => {
+    //     setIsNewUserLoading(true);
+    //     setNewUserError(null);
+    
+    //     const users = [];
+    //     for (const username of usernames) {
+    //         const response = await getRequestUser(`${baseUrl}/users/findsingle/${username.trim()}`);
+    //         if (response && response.error) {
+    //             setNewUserError(response);
+    //             setIsNewUserLoading(false);
+    //             return;
+    //         } else {
+    //             users.push(response);
+    //         }
+    //     }
+    
+    //     setIsNewUserLoading(false);
+    //     setOtherUser(users);
+    // }, []);
 
       const AddToChat = useCallback(async(chatId, newMemberId)=>{
 
@@ -136,26 +150,28 @@ export const ChatContextProvider = ({children,user}) => {
         );
         }
     },[]);
-    // const createChat = useCallback(async(members)=>{
-    //     if(members !==null){
-    //     const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({members}));
-    //     if(response.error){
-    //         return console.log("Error");
-    //     }
-    //     setUserChats((prev) => [...prev, response]);
-    // }
-    // },[])
-    const createChat = useCallback(async(FirstId, SecondId)=>{
-        if(FirstId !== null && SecondId !==null){
-        const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({
-            FirstId, SecondId,
-        }));
+
+    const createChat = useCallback(async(members)=>{
+        console.log(members);
+        if(members !==null){
+        const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({members}));
         if(response.error){
-            return console.log(error);
+            return console.log("Error");
         }
         setUserChats((prev) => [...prev, response]);
     }
     },[]);
+    // const createChat = useCallback(async(FirstId, SecondId)=>{
+    //     if(FirstId !== null && SecondId !==null){
+    //     const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({
+    //         FirstId, SecondId,
+    //     }));
+    //     if(response.error){
+    //         return console.log(error);
+    //     }
+    //     setUserChats((prev) => [...prev, response]);
+    // }
+    // },[]);
 
 
 
@@ -198,5 +214,5 @@ export const ChatContextProvider = ({children,user}) => {
     },[]);
 
     return (<ChatContext.Provider value = {{userChats, isUserChatsLoading ,userChatError, newUserError,
-        isNewUserLoading,otherUser,findNewUser,createChat, updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage, onlineUsers, AddToChat, allUsers}}>{children}</ChatContext.Provider>);
+        isNewUserLoading,otherUser,createChat, setNewUserError,findNewUser,updateCurrentChat,messages, isMessagesLoading, messagesError,currentChat, sendMessage, onlineUsers, AddToChat, allUsers}}>{children}</ChatContext.Provider>);
 }

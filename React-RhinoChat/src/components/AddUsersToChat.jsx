@@ -6,7 +6,9 @@ import ErrorModal from './ErrorModal';
 const AddUsersToChatModal = () => {
     const {user} = useContext(AuthContext);
     const [username, setUsername] = useState("");
-    const {findNewUser, newUserError, isNewUserLoading, otherUser,AddToChat,userChats,currentChat } = useContext(ChatContext);
+    const {findNewUser, newUserError, setNewUserError, isNewUserLoading, otherUser,AddToChat,userChats,currentChat } = useContext(ChatContext);
+    const [modalOpen, setModalOpen] = useState(false);  // State to manage modal visibility
+
 
     const handleInputChange = (e) => {
         setUsername(e.target.value);
@@ -27,6 +29,16 @@ const AddUsersToChatModal = () => {
             }        }
     }, [otherUser, currentChat, AddToChat]);
 
+    useEffect(() => {
+        if (newUserError?.error) {
+          setModalOpen(true);  // Assuming setModalOpen is defined; if not, define it similarly to newUserError
+        }
+      }, [newUserError]);
+    
+      const handleCloseModal = () => {
+        setModalOpen(false);  // Function to close the modal and potentially clear errors if needed
+        setNewUserError(false);
+    };
 
     const [isPopupVisible, setPopupVisible] = useState(false);
     const UserModal = () => {
@@ -58,6 +70,9 @@ const AddUsersToChatModal = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+                    {newUserError?.error && (
+                <ErrorModal show={modalOpen} onHide={handleCloseModal} />
+            )}
     </>
 );
 }
