@@ -18,11 +18,23 @@ io.on("connection", (socket) => {
 });
 
     socket.on("sendMessage", (message)=>{
-        const user = onlineUsers.find(user => user.userId === message.otherUserId);
-        if(user){
-            io.to(user.socketId).emit("getMessage", message);
+       // const users = onlineUsers.map(user => user.userId).filter(userId => new Set(message.OtherUserId).has(userId));
+       //const users = message?.otherUserId.filter(item => onlineUsers.some(user => user.userId === item));
+       const users = onlineUsers.filter(user => message?.otherUserId.some(item => user.userId === item));
+
+
+        if (users && users.length > 0) {
+            users.forEach(user => {
+                io.to(user.socketId).emit("getMessage", message);
+                io.to(user.socketId).emit("getNotification", {
+                    chatId: message.chatId,
+                    isRead: false,
+                    date: new Date(),
+                });
+
+            });
         }
-    })
+    });
 
 
     socket.on("disconnect", ()=>{

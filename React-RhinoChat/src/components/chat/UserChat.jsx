@@ -2,13 +2,25 @@ import React, { useContext } from "react";
 import { useFetchOtherUser } from "../../hooks/useFetchOtherUser";
 import { Stack } from "react-bootstrap";
 import { ChatContext } from "../../context/ChatContext";
+import { unreadNotificationsFunc } from "../../utils/unreadNotifications";
+import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage";
+import moment from "moment";
 
 const UserChat = ({ chat, user }) => {
     const { otherUsers } = useFetchOtherUser(chat, user);
-    const { onlineUsers } = useContext(ChatContext);
+    const { onlineUsers, notifications, markThisUserNotifAsRead } = useContext(ChatContext);
+    const {latestMessage} = useFetchLatestMessage(chat);
 
     const isUserOnline = (userId) => onlineUsers?.some(onlineUser => onlineUser.userId === userId);
-
+    const unreadNotifications = unreadNotificationsFunc(notifications);
+    const thisUserNotifications = unreadNotifications?.filter(not=>not.chatId ==chat?._id);
+    const truncateText = (text) => {
+        let shortText = text.substring(0, 20);
+        if(text.length>20){
+            shortText = shortText + "...";
+        }
+        return shortText;
+    };
     const renderUsernames = () => {
         if (Array.isArray(otherUsers) && otherUsers.length > 0) {
             if (chat.is_group) {
@@ -29,17 +41,31 @@ const UserChat = ({ chat, user }) => {
             direction="horizontal" 
             className=" user-card align-items-center p-2 justify-content-between mt-2" 
             role="button" 
+            onClick = {()=>{
+                if(thisUserNotifications?.length !== 0){
+                    markThisUserNotifAsRead(
+                        thisUserNotifications,
+                        notifications
+                    );
+                }
+            }}
             tabIndex={0}
         >
             <div className="text-content">
                 <div className="name">
                     {renderUsernames()}
                 </div>
-                <div className="text">Hello. How are you?</div>
+                <div className="text">{
+                    latestMessage?.text && (
+                        <span>{truncateText(latestMessage?.text)}</span>
+                    )
+                    }</div>
             </div>
             <div className="d-flex flex-column align-items-end">
-                <div className="date">5/24/2024</div>
-                <div className="this-user-notifications">4</div>
+                <div className="date">{moment(latestMessage?.createdAt).calendar()}</div>
+                <div className={thisUserNotifications?.length > 0 ? "this-user-notifications": ""}>
+                    {thisUserNotifications?.length>0? thisUserNotifications?.length : ""}
+                </div>
                 {!chat.is_group && otherUsers.some(user => isUserOnline(user._id)) && (
                     <span className="user-online"></span>
                 )}
