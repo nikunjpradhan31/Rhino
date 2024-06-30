@@ -1,4 +1,6 @@
 export const baseUrl = "http://localhost:5000/api";
+//export const baseUrl = "https://2v3bf66x-5000.use.devtunnels.ms/api";
+
 
 export const postRequest = async (url, body) => {
     const response = await fetch(url, {
@@ -57,7 +59,7 @@ export const getRequestUser = async (url) => {
     return data;
 };
 
-export const putRequest = async (url, body) => {
+export const putRequest = async (url) => {
     const response = await fetch(url,{
         method: "PUT",
         headers: {
@@ -65,6 +67,29 @@ export const putRequest = async (url, body) => {
         }
     });
 
+    const data = await response.json();
+
+    if (!response.ok) {
+        let message;
+
+        if (data?.message) {
+            message = data.message;
+        } else {
+            message = data;
+        }
+        return { error: true, message };
+    }
+
+    return data;
+};
+
+export const deleteRequest = async (url) => {
+    const response = await fetch(url,{
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
     const data = await response.json();
 
     if (!response.ok) {

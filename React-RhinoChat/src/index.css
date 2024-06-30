@@ -204,3 +204,15 @@ body{
     align-items: center;
     justify-content: center;
   }
+
+  .custom-modal .modal-content {
+    background-color: rgb(15, 25, 71) !important;
+    color: white; /* Optional: to make text readable */
+  }
+
+  .custom-modal .modal-dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60vh; /* Full viewport height */
+  }

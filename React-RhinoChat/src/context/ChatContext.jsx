@@ -1,6 +1,5 @@
 import { createContext , useState, useEffect, useCallback} from "react";
-import { baseUrl, getRequest, postRequest , getRequestUser, putRequest} from "../utils/services";
-import {Container, Stack} from "react-bootstrap";
+import { baseUrl, getRequest, postRequest , getRequestUser, putRequest, deleteRequest} from "../utils/services";
 import { io } from "socket.io-client";
 export const ChatContext = createContext();
 
@@ -31,7 +30,6 @@ export const ChatContextProvider = ({children,user}) => {
             newSocket.disconnect();
         };
     },[user]);
-
     //online users through socket
     useEffect(()=>{
         if(socket === null) return;
@@ -114,21 +112,22 @@ export const ChatContextProvider = ({children,user}) => {
         }, [fetchAllUsers]);
     
 
-    const findNewUser = useCallback(async (username) => {
-        setIsNewUserLoading(true);
-        setNewUserError(null);
+    // const findNewUser = useCallback(async (username) => {
+    //     setIsNewUserLoading(true);
+    //     setNewUserError(null);
     
-          const response = await getRequestUser(`${baseUrl}/users/findsingle/${username}`);
-          setIsNewUserLoading(false);
+    //       const response = await getRequestUser(`${baseUrl}/users/findsingle/${username}`);
+    //       setIsNewUserLoading(false);
 
-         if(response && response.error){
-            return setNewUserError(response);
-          }
-          else {
-            setOtherUser(response);
-          }
+    //      if(response && response.error){
+    //         return setNewUserError(response);
+    //       }
+    //       else {
+    //         setOtherUser(response);
+    //       }
 
-      }, []);
+    //   }, []);
+
     // const findNewUsers = useCallback(async (usernames) => {
     //     setIsNewUserLoading(true);
     //     setNewUserError(null);
@@ -165,15 +164,19 @@ export const ChatContextProvider = ({children,user}) => {
     },[]);
 
     const createChat = useCallback(async(members)=>{
-        console.log(members);
         if(members !==null){
-        const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({members}));
+        const chatOwner = user?._id;
+
+        const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({members,chatOwner}));
         if(response.error){
             return console.log("Error");
         }
         setUserChats((prev) => [...prev, response]);
+        updateCurrentChat(response);
     }
-    },[]);
+    },[user]);
+
+    
     // const createChat = useCallback(async(FirstId, SecondId)=>{
     //     if(FirstId !== null && SecondId !==null){
     //     const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({
@@ -187,10 +190,39 @@ export const ChatContextProvider = ({children,user}) => {
     // },[]);
 
 
+    const changeChatTitle = useCallback(async (currentChat, chatTitle )=>{
+        if(currentChat?.chatOwner === user?._id && currentChat?.is_group){
+            const response = await putRequest(`${baseUrl}/chats/changeName/${chatTitle}/${currentChat._id}`);
+            if(response.error){
+                return console.log("Error");
+            }
+            updateCurrentChat(response);
+        }
+    },[user]);
+
+    const deleteGroupChat = useCallback(async (currentChat)=>{
+        if (currentChat?.is_group && user?._id === currentChat?.chatOwner) {
+            const response = await deleteRequest(`${baseUrl}/chats/delete/${currentChat._id}/${user?._id}`);
+            if(response.error){
+                return console.log("Error");
+            }
+            updateCurrentChat([]);
+        }
+    },[user]);
+
+    const leaveGroupChat = useCallback(async (currentChat)=>{
+        if (currentChat?.is_group && user?._id !== currentChat?.chatOwner) {
+            const response = await putRequest(`${baseUrl}/chats/leave/${currentChat._id}/${user?._id}`);
+            if(response.error){
+                return console.log("Error");
+            }
+            updateCurrentChat([]);
+        }
+    },[user]);
 
     const updateCurrentChat = useCallback((chat)=>{
         setCurrentChat(chat);
-    },[]);
+    },[user]);
 
     useEffect(()=>{
         const getMessages = async()=>{
@@ -250,8 +282,6 @@ export const ChatContextProvider = ({children,user}) => {
             isNewUserLoading,
             otherUser,
             createChat, 
-            setNewUserError,
-            findNewUser,
             updateCurrentChat,
             messages, 
             isMessagesLoading, 
@@ -263,5 +293,8 @@ export const ChatContextProvider = ({children,user}) => {
             allUsers,
             notifications,
             markThisUserNotifAsRead,
+            changeChatTitle,
+            deleteGroupChat,
+            leaveGroupChat,
         }}>{children}</ChatContext.Provider>);
 }

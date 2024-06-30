@@ -5,7 +5,7 @@ import { useFetchOtherUser } from "../hooks/useFetchOtherUser";
 import{ Button, Stack} from "react-bootstrap";
 import moment from "moment";
 import InputEmoji from "react-input-emoji";
-import AddUsersToChatModal from "./AddUsersToChat";
+import ChatSettings from "./ChatSettings";
 const ChatBox = () => {
     const {user} = useContext(AuthContext);
     const {currentChat, messages, isMessagesLoading, messageError, sendMessage} = useContext(ChatContext);
@@ -38,7 +38,7 @@ const ChatBox = () => {
     })()}
 </>
 
-        <><AddUsersToChatModal/></>
+        <><ChatSettings/></>
     </div>
     <Stack gap ={3} className="messages">
     {messages && messages.map((message, index) => {

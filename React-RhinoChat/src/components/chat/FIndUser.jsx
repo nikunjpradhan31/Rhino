@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Form, Button, InputGroup, Stack } from 'react-bootstrap';
 import { ChatContext } from '../../context/ChatContext';
 import { AuthContext } from '../../context/AuthContext';
-import ErrorModal from '../ErrorModal';
 
 const SearchOtherUsers = () => {
     const { user } = useContext(AuthContext);
@@ -78,7 +77,7 @@ const SearchOtherUsers = () => {
                     Search
                 </Button>
                 {filteredUsers.length > 0 && (
-                <ul className="list-group" style={{width: '30vh'}}>
+                <ul className="list-group" style={{width: '30vh',zIndex: 10, position: 'absolute',top:"100%"}}>
                     {filteredUsers.map(user => (
                         <li
                             key={user._id}

@@ -3,7 +3,7 @@
 // finding a certain chat
 
 const chatModel = require("../models/ChatModel");
-
+const messageModel = require("../models/messageModel");
 
 //creating a new chat between two users
 // const createChat = async(req, res) => {
@@ -27,7 +27,7 @@ const chatModel = require("../models/ChatModel");
 // }
 
 const createChat = async (req, res) => {
-    const { members } = req.body; // Expecting an array of strings
+    const { members, chatOwner} = req.body; // Expecting an array of strings
     if (members.length < 2) {
         return res.status(400).json({ error: 'members must be an array with at least two user IDs' });
     }
@@ -43,7 +43,7 @@ const createChat = async (req, res) => {
 
         // Create a new chat with the given members
 
-        const newChat = new chatModel({ members: members, is_group: isgroup });
+        const newChat = new chatModel({ members: members, is_group: isgroup, chatOwner: chatOwner});
         const response = await newChat.save();
         res.status(200).json(response);
     } catch (error) {
@@ -127,9 +127,90 @@ const AddToChat = async (req, res) => {
     }
 };
 
-// const LeaveChat = async (req, res) => {
-//     const {}
-// }
+
+const ChangeGroupChatName = async (req, res) => {
+    const { chatTitle, chatId } = req.params;
+
+    if (!chatTitle || chatTitle === "") { 
+        return res.status(400).json({ error: "Please input a valid chat title" });
+    }
+    try {
+        const chat = await chatModel.findById(chatId);
+
+        if (!chat) {
+            return res.status(404).json({ error: "Chat not found" });
+        }
+
+        if(chat.is_group === false){
+            return res.status(404).json({ error: "This chat is not a groupchat" });
+        }
+
+        chat.chatTitle = chatTitle;
+        await chat.save();
+
+        res.status(200).json(chat);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const DeleteChat = async (req, res) => {
+    const { chatId, userId } = req.params;
+
+    if (!chatId) {
+        return res.status(400).json({ error: "No chat given to delete" });
+    }
+    if (!userId) {
+        return res.status(400).json({ error: "No user present to delete chat" });
+    }
+
+    try {
+        const chat = await chatModel.findById(chatId);
+
+        if (!chat) {
+            return res.status(404).json({ error: "Chat not found" });
+        }
+
+        if (chat.chatOwner !== userId) {
+            return res.status(403).json({ error: "You are not the chat owner, you cannot delete this chat" });
+        }
+
+        await chatModel.findByIdAndDelete(chatId);
+        await messageModel.deleteMany({chatId: chatId});
+        return res.status(200).json({ message: "Chat successfully deleted" });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+const LeaveChat = async (req, res) => {
+    const {chatId, userId} = req.params;
+    if(!chatId || !userId){
+        return res.status(400).json({ error: "No chat was selected or no user was selected" });
+    }
+    try{
+        const chat = await chatModel.findById(chatId);
+        if (!chat) {
+            return res.status(404).json({ error: "Chat not found" });
+        }
+        if(chat.chatOwner === userId){
+            return res.status(400).json({ error: "Cannot leave chat you are owner of" });
+        }
+        if(!chat.members.includes(userId)){
+            return res.status(400).json({ error: "Cannot leave chat you are not part of" });
+
+        }
+        if(chat.members.length <= 2){
+            return res.status(400).json({ error: "Chat cannot have less than 2 users, please message chat owner to delete chat" });
+        }
+        chat.members = chat.members.filter(id => id !== userId);
+        await chat.save();
+        res.status(200).json(chat);
+
+    }catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
-module.exports = {createChat, getUsersChats, findChat, AddToChat};
+module.exports = {createChat, getUsersChats, findChat, AddToChat,ChangeGroupChatName, DeleteChat, LeaveChat};

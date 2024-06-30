@@ -15,7 +15,7 @@ const ChatPage = () => {
     <Container>
         <SearchOtherUsers />
         <Stack direction = "horizontal" gap = {4} className="align-items-start" >
-            <Stack className="messages-box flex-grow-0 pr-5" style={{ overflowY: 'auto', maxHeight: '70vh',  overflowX: 'hidden', paddingRight: "5rem", margin: "0"}} gap={4}>
+            <Stack className="messages-box flex-grow-0 pr-5" style={{ overflowY: 'auto', maxHeight: '85vh',  overflowX: 'hidden', paddingRight: "5rem", margin: "0"}} gap={4}>
             {isUserChatsLoading && <p>Retrieving Chats...</p>}
             {userChats?.map((chat,index)=>{
                 return(
