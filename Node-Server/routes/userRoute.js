@@ -8,9 +8,9 @@ router.post("/login", loginUser)
 
 router.get("/find/:userId", findUser);
 
-router.get("/findsingle/:username", findSingleUser);
+// router.get("/findsingle/:username", findSingleUser);
 
-router.get("/",getUsers);
+ //router.get("/",getUsers);
 
 router.get("/:searchString", searchUsers);
 

@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Form, Button, InputGroup, Stack, Modal } from 'react-bootstrap';
 import { ChatContext } from '../context/ChatContext';
 import { AuthContext } from '../context/AuthContext';
+import SearchOtherUsers from './chat/SearchOtherUsers';
 
 const ChatSettings = () => {
     const {
@@ -12,12 +13,18 @@ const ChatSettings = () => {
         changeChatTitle,
         deleteGroupChat,
         leaveGroupChat,
+        filteredUsersAdd,
+        selectedUser,
+        FilteredUsersAddLoading,
+        SearchForUsersToAdd,
+        setSelectedUser,
+        setFilteredUsersAdd,
     } = useContext(ChatContext);
     const {user} = useContext(AuthContext);
 
     const [username, setUsername] = useState("");
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
+    //const [filteredUsers, setFilteredUsers] = useState([]);
+    //const [selectedUser, setSelectedUser] = useState(null);
     const [isPopupVisible, setPopupVisible] = useState(false);
     const [chat_title, setChatTitle] = useState("");
 
@@ -47,25 +54,19 @@ const ChatSettings = () => {
 
 
     useEffect(() => {
-        if (username.trim()) {
-            const filtered = allUsers.filter(user =>
-                user.username.toLowerCase().includes(username.toLowerCase())
-            );
-            setFilteredUsers(filtered);
-        } else {
-            setFilteredUsers([]);
-        }
-    }, [username, allUsers]);
+        SearchForUsersToAdd(username);
+    }, [username]);
 
     //
-
+console.log(selectedUser);
     //Modal Rendering
     const toggleUserModal = () => {
         setPopupVisible(!isPopupVisible);
+        if(!isPopupVisible){
+            setSelectedUser(null);
+        }
     };
     //
-
-
     const handleInputChangeTitle = (e) => {
         setChatTitle(e.target.value);
     };
@@ -128,9 +129,9 @@ const ChatSettings = () => {
                                 >
                                     Add User
                                 </Button>
-                                {filteredUsers.length > 0 && (
+                                {filteredUsersAdd.length > 0 && (
                                     <ul className="list-group" style={{ width: '30vh', zIndex: 10, position: 'absolute', top: "100%" }}>
-                                        {filteredUsers.map(user => (
+                                        {filteredUsersAdd.map(user => (
                                             <li
                                                 key={user._id}
                                                 className="list-group-item"

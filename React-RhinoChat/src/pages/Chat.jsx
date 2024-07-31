@@ -3,7 +3,7 @@ import { ChatContext } from "../context/ChatContext";
 import { Container, Stack } from "react-bootstrap";
 import UserChat from "../components/chat/UserChat";
 import { AuthContext } from "../context/AuthContext";
-import SearchOtherUsers from "../components/chat/FIndUser";
+import SearchOtherUsers from "../components/chat/SearchOtherUsers";
 import ChatBox from "../components/ChatBox";
 
 

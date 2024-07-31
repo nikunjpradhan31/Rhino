@@ -16,10 +16,17 @@ export const ChatContextProvider = ({children,user}) => {
     const [messagesError, setMessagesError] = useState(null);
     const [sendTextMessageError, setTextMessageError] = useState(null);
     const [newMessage, setNewMessage] = useState(null);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    const [FilteredUsersLoading, setFilteredUsersLoading] = useState("");
+    const [filteredUsersAdd, setFilteredUsersAdd] = useState([]);
+    const [selectedUser, setSelectedUser] = useState([]);
+    const [FilteredUsersAddLoading, setFilteredUsersAddLoading] = useState("");
    // const [allUsers, setAllUsers] = useState([]);
     //const [isAllUsersLoading, setIsAllUsersLoading] = useState(false);
     //const [allUsersError, setAllUsersError] = useState(null);
     const [notifications, setNotifications] = useState([]);
+    
 
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
@@ -71,7 +78,6 @@ export const ChatContextProvider = ({children,user}) => {
                 setNotifications(prev => [response, ...prev]);
             }
         };
-        console.log(notifications);
         socket.on("getMessage", handleGetMessage);
         socket.on("getNotification", handleGetNotif);
     
@@ -98,58 +104,6 @@ export const ChatContextProvider = ({children,user}) => {
         getUserChats();
     },[user,notifications]);
 
-        // const fetchAllUsers = useCallback(async () => {
-        //     setIsAllUsersLoading(true);
-        //     setAllUsersError(null);
-        //     const response = await getRequest(`${baseUrl}/users/`);
-        //     setIsAllUsersLoading(false);
-        //     if (response.error) {
-        //         return setAllUsersError(response);
-        //     }
-        //     const filteredUsers = response.filter(u => u._id !== user?._id);
-
-        //     setAllUsers(filteredUsers);
-        // }, [user]);
-        // useEffect(() => {
-        //     fetchAllUsers();
-        // }, [fetchAllUsers]);
-    
-
-    // const findNewUser = useCallback(async (username) => {
-    //     setIsNewUserLoading(true);
-    //     setNewUserError(null);
-    
-    //       const response = await getRequestUser(`${baseUrl}/users/findsingle/${username}`);
-    //       setIsNewUserLoading(false);
-
-    //      if(response && response.error){
-    //         return setNewUserError(response);
-    //       }
-    //       else {
-    //         setOtherUser(response);
-    //       }
-
-    //   }, []);
-
-    // const findNewUsers = useCallback(async (usernames) => {
-    //     setIsNewUserLoading(true);
-    //     setNewUserError(null);
-    
-    //     const users = [];
-    //     for (const username of usernames) {
-    //         const response = await getRequestUser(`${baseUrl}/users/findsingle/${username.trim()}`);
-    //         if (response && response.error) {
-    //             setNewUserError(response);
-    //             setIsNewUserLoading(false);
-    //             return;
-    //         } else {
-    //             users.push(response);
-    //         }
-    //     }
-    
-    //     setIsNewUserLoading(false);
-    //     setOtherUser(users);
-    // }, []);
 
       const AddToChat = useCallback(async(chatId, newMemberId)=>{
 
@@ -166,6 +120,49 @@ export const ChatContextProvider = ({children,user}) => {
         }
     },[]);
 
+
+    const SearchForUsers = useCallback(async(SearchString)=>{
+            if( SearchString.length > 0){
+            setFilteredUsersLoading(true);
+                const response = await getRequest(`${baseUrl}/users/${SearchString}`);
+                // Check for response error
+                if (response.error) {
+                    setFilteredUsers([]);
+                } else {
+                    // Filter users based on selectedUsers
+                    const filtered = response.filter(user => 
+                        !selectedUsers.some(Suser => Suser._id === user._id)
+                    );
+                    setFilteredUsers(filtered);
+                }
+                setFilteredUsersLoading(false);
+        }
+        else{
+            setFilteredUsers([]);
+        }
+    },[]);
+
+    const SearchForUsersToAdd = useCallback(async(SearchString)=>{
+            if( SearchString.length > 0){
+                setFilteredUsersAddLoading(true);
+                const response = await getRequest(`${baseUrl}/users/${SearchString}`);
+                // Check for response error
+                if (response.error) {
+                    setFilteredUsersAdd([]);
+                } else {
+                    // Filter users based on selectedUsers
+                    const filtered = response.filter(user => 
+                        !selectedUser.some(Suser => Suser._id === user._id)
+                    );
+                    setFilteredUsersAdd(filtered);
+                }
+                setFilteredUsersAddLoading(false);
+        }
+        else{
+            setFilteredUsersAdd([]);
+        }
+    },[]);
+
     const createChat = useCallback(async(members)=>{
         if(members !==null){
         const chatOwner = user?._id;
@@ -178,20 +175,6 @@ export const ChatContextProvider = ({children,user}) => {
         updateCurrentChat(response);
     }
     },[user]);
-
-    
-    // const createChat = useCallback(async(FirstId, SecondId)=>{
-    //     if(FirstId !== null && SecondId !==null){
-    //     const response = await postRequest(`${baseUrl}/chats/`,JSON.stringify({
-    //         FirstId, SecondId,
-    //     }));
-    //     if(response.error){
-    //         return console.log(error);
-    //     }
-    //     setUserChats((prev) => [...prev, response]);
-    // }
-    // },[]);
-
 
     const changeChatTitle = useCallback(async (currentChat, chatTitle )=>{
         if(currentChat?.chatOwner === user?._id && currentChat?.is_group){
@@ -303,5 +286,19 @@ export const ChatContextProvider = ({children,user}) => {
             changeChatTitle,
             deleteGroupChat,
             leaveGroupChat,
+
+            filteredUsers,
+            selectedUsers,
+            FilteredUsersLoading,
+            SearchForUsers,
+            setSelectedUsers,
+            setFilteredUsers,
+
+            filteredUsersAdd,
+            selectedUser,
+            FilteredUsersAddLoading,
+            SearchForUsersToAdd,
+            setSelectedUser,
+            setFilteredUsersAdd,
         }}>{children}</ChatContext.Provider>);
 }

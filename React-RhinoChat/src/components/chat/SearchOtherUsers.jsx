@@ -5,15 +5,13 @@ import { AuthContext } from '../../context/AuthContext';
 import { getRequest, baseUrl } from '../../utils/services';
 const SearchOtherUsers = () => {
     const { user } = useContext(AuthContext);
-    const {isNewUserLoading, createChat, userChats, allUsers } = useContext(ChatContext);
-
+    const {isNewUserLoading, createChat, userChats, filteredUsers, selectedUsers, FilteredUsersLoading, SearchForUsers , setSelectedUsers, setFilteredUsers} = useContext(ChatContext);
     const [SearchString, setUsername] = useState("");
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [selectedUsers, setSelectedUsers] = useState([]);
-    const [FilteredUsersLoading, setFilteredUsersLoading] = useState("");
+
     const handleInputChange = (e) => {
         setUsername(e.target.value);
     };
+
     const handleSearchClick = async (e) => {
         e.preventDefault();
         if (selectedUsers.length > 0 && user) {
@@ -25,7 +23,6 @@ const SearchOtherUsers = () => {
             );
             if (!isExistingChat) {
                 const members = [...selectedUserIds, user?._id];
-                console.log(members);
                 createChat(members);
             }
             setUsername("");
@@ -35,34 +32,8 @@ const SearchOtherUsers = () => {
 
 
     useEffect(() => {
-        const getFilteredUsers = async () => {
-            setFilteredUsersLoading(true);
-            try {
-                const response = await getRequest(`${baseUrl}/users/${SearchString}`);
-                
-                // Check for response error
-                if (response.error) {
-                    setFilteredUsers([]);
-                } else {
-                    // Filter users based on selectedUsers
-                    const filtered = response.filter(user => 
-                        !selectedUsers.some(Suser => Suser._id === user._id)
-                    );
-                    setFilteredUsers(filtered);
-                }
-            } catch (error) {
-                setFilteredUsers([]);
-            } finally {
-                setFilteredUsersLoading(false);
-            }
-        };
-
-        if (SearchString.trim()) {
-            getFilteredUsers();
-        } else {
-            setFilteredUsers([]);
-        }
-    }, [SearchString, baseUrl, selectedUsers]);
+        SearchForUsers(SearchString);
+    }, [SearchString]);
 
 
 
