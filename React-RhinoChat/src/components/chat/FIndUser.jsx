@@ -2,14 +2,15 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Form, Button, InputGroup, Stack } from 'react-bootstrap';
 import { ChatContext } from '../../context/ChatContext';
 import { AuthContext } from '../../context/AuthContext';
-
+import { getRequest, baseUrl } from '../../utils/services';
 const SearchOtherUsers = () => {
     const { user } = useContext(AuthContext);
     const {isNewUserLoading, createChat, userChats, allUsers } = useContext(ChatContext);
 
-    const [username, setUsername] = useState("");
+    const [SearchString, setUsername] = useState("");
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [FilteredUsersLoading, setFilteredUsersLoading] = useState("");
     const handleInputChange = (e) => {
         setUsername(e.target.value);
     };
@@ -32,16 +33,37 @@ const SearchOtherUsers = () => {
         }
     };
 
+
     useEffect(() => {
-        if (username.trim()) {
-            const filtered = allUsers.filter(user =>
-                user.username.toLowerCase().includes(username.toLowerCase())
-            );
-            setFilteredUsers(filtered);
+        const getFilteredUsers = async () => {
+            setFilteredUsersLoading(true);
+            try {
+                const response = await getRequest(`${baseUrl}/users/${SearchString}`);
+                
+                // Check for response error
+                if (response.error) {
+                    setFilteredUsers([]);
+                } else {
+                    // Filter users based on selectedUsers
+                    const filtered = response.filter(user => 
+                        !selectedUsers.some(Suser => Suser._id === user._id)
+                    );
+                    setFilteredUsers(filtered);
+                }
+            } catch (error) {
+                setFilteredUsers([]);
+            } finally {
+                setFilteredUsersLoading(false);
+            }
+        };
+
+        if (SearchString.trim()) {
+            getFilteredUsers();
         } else {
             setFilteredUsers([]);
         }
-    }, [username, allUsers]);
+    }, [SearchString, baseUrl, selectedUsers]);
+
 
 
     const handleUserSelect = (user) => {
@@ -49,7 +71,9 @@ const SearchOtherUsers = () => {
             prevSelectedUsers.some(selectedUser => selectedUser._id === user._id)
                 ? prevSelectedUsers
                 : [...prevSelectedUsers, user]
-        );        setUsername("");
+        );        
+        setUsername("");
+        setFilteredUsers([]);
 
     };
 
@@ -66,7 +90,7 @@ const SearchOtherUsers = () => {
                 <Form.Control
                     type="text"
                     placeholder={isNewUserLoading ? "Retrieving user..." : "Search Users"}
-                    value={username}
+                    value={SearchString}
                     onChange={handleInputChange}
                 />
                 <Button

@@ -1,6 +1,7 @@
 const {Server} = require("socket.io");
 
 const io = new Server({cors: "http://localhost:5173"});
+//const io = new Server({cors: "https://2v3bf66x-5173.use.devtunnels.ms"});
 
 
 let onlineUsers = [];
@@ -29,7 +30,6 @@ io.on("connection", (socket) => {
                 io.to(user.socketId).emit("getMessage", message);
                 io.to(user.socketId).emit("getNotification", {
                     chatId: message.chatId,
-                    isRead: false,
                     date: new Date(),
                 });
 

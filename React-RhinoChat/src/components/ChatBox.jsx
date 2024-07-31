@@ -14,8 +14,8 @@ const ChatBox = () => {
     const scroll = useRef();
 
     useEffect(()=>{
-        scroll.current?.scrollIntoView({behavior: "smooth"});
-    },[messages])
+        scroll.current?.scrollIntoView({behavior: "smooth", block: "end"});
+    },[messages]);
     if(otherUsers.length === 0){ return(<p style={{ textAlign:"center", width: "100%"}}>No conversation selected yet...</p>);}
     if(isMessagesLoading){ return(<p style={{ textAlign:"center", width: "100%"}}>Retrieving conversation...</p>);}
     return (

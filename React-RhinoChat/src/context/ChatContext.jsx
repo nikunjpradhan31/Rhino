@@ -16,15 +16,17 @@ export const ChatContextProvider = ({children,user}) => {
     const [messagesError, setMessagesError] = useState(null);
     const [sendTextMessageError, setTextMessageError] = useState(null);
     const [newMessage, setNewMessage] = useState(null);
-    const [allUsers, setAllUsers] = useState([]);
-    const [isAllUsersLoading, setIsAllUsersLoading] = useState(false);
-    const [allUsersError, setAllUsersError] = useState(null);
+   // const [allUsers, setAllUsers] = useState([]);
+    //const [isAllUsersLoading, setIsAllUsersLoading] = useState(false);
+    //const [allUsersError, setAllUsersError] = useState(null);
     const [notifications, setNotifications] = useState([]);
 
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
     useEffect (()=> {
-        const newSocket = io("http://localhost:3000");
+       const newSocket = io("http://localhost:3000");
+        //const newSocket = io("https://2v3bf66x-3000.use.devtunnels.ms/");
+
         setSocket(newSocket);
         return () =>{
             newSocket.disconnect();
@@ -51,7 +53,7 @@ export const ChatContextProvider = ({children,user}) => {
 
     },[newMessage]);
 
-    // //receive message and notification through socket
+    //receive message and notification through socket
 
     useEffect(() => {
         if (socket === null) return;
@@ -64,11 +66,12 @@ export const ChatContextProvider = ({children,user}) => {
         const handleGetNotif = (response) => {
             const isChatOpen = currentChat?._id === response.chatId;
             if(isChatOpen){
-                setNotifications(prev=>[{...response, isRead:true},...prev]);
+                setNotifications(prev=>[{...response},...prev]);
             }else{
                 setNotifications(prev => [response, ...prev]);
             }
         };
+        console.log(notifications);
         socket.on("getMessage", handleGetMessage);
         socket.on("getNotification", handleGetNotif);
     
@@ -95,21 +98,21 @@ export const ChatContextProvider = ({children,user}) => {
         getUserChats();
     },[user,notifications]);
 
-        const fetchAllUsers = useCallback(async () => {
-            setIsAllUsersLoading(true);
-            setAllUsersError(null);
-            const response = await getRequest(`${baseUrl}/users/`);
-            setIsAllUsersLoading(false);
-            if (response.error) {
-                return setAllUsersError(response);
-            }
-            const filteredUsers = response.filter(u => u._id !== user?._id);
+        // const fetchAllUsers = useCallback(async () => {
+        //     setIsAllUsersLoading(true);
+        //     setAllUsersError(null);
+        //     const response = await getRequest(`${baseUrl}/users/`);
+        //     setIsAllUsersLoading(false);
+        //     if (response.error) {
+        //         return setAllUsersError(response);
+        //     }
+        //     const filteredUsers = response.filter(u => u._id !== user?._id);
 
-            setAllUsers(filteredUsers);
-        }, [user]);
-        useEffect(() => {
-            fetchAllUsers();
-        }, [fetchAllUsers]);
+        //     setAllUsers(filteredUsers);
+        // }, [user]);
+        // useEffect(() => {
+        //     fetchAllUsers();
+        // }, [fetchAllUsers]);
     
 
     // const findNewUser = useCallback(async (username) => {
@@ -221,14 +224,18 @@ export const ChatContextProvider = ({children,user}) => {
     },[user]);
 
     const updateCurrentChat = useCallback((chat)=>{
+        if(chat !== null){
+            chat.unreadMessages[user?._id] = 0;
+        }
         setCurrentChat(chat);
     },[user]);
 
     useEffect(()=>{
+        if(currentChat !== null && user !==null){
         const getMessages = async()=>{
             setMessagesLoading(true);
             setMessagesError(null);
-                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
+                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}/${user?._id}`);
                 setMessagesLoading(false);
                 if(response.error){
                     return setMessagesError(response);
@@ -236,8 +243,8 @@ export const ChatContextProvider = ({children,user}) => {
                 Setmessages(response);
         }
         getMessages();
-
-    },[currentChat]);
+    }
+    },[currentChat,user]);
 
     const sendMessage = useCallback( async (textMessage, sender, currentChatId, setTextMessage)=> {
         if(!textMessage) return;
@@ -290,7 +297,7 @@ export const ChatContextProvider = ({children,user}) => {
             sendMessage, 
             onlineUsers,
             AddToChat, 
-            allUsers,
+            //allUsers,
             notifications,
             markThisUserNotifAsRead,
             changeChatTitle,

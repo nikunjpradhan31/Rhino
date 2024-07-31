@@ -10,7 +10,6 @@ const UserChat = ({ chat, user }) => {
     const { otherUsers } = useFetchOtherUser(chat, user);
     const { onlineUsers, notifications, markThisUserNotifAsRead } = useContext(ChatContext);
     const {latestMessage} = useFetchLatestMessage(chat);
-
     const isUserOnline = (userId) => onlineUsers?.some(onlineUser => onlineUser.userId === userId);
     const unreadNotifications = unreadNotificationsFunc(notifications);
     const thisUserNotifications = unreadNotifications?.filter(not=>not.chatId ==chat?._id);
@@ -21,6 +20,7 @@ const UserChat = ({ chat, user }) => {
         }
         return shortText;
     };
+
     const renderUsernames = () => {
         if (Array.isArray(otherUsers) && otherUsers.length > 0) {
             if (chat.is_group) {
@@ -63,8 +63,8 @@ const UserChat = ({ chat, user }) => {
             </div>
             <div className="d-flex flex-column align-items-end">
                 <div className="date">{moment(latestMessage?.createdAt).calendar()}</div>
-                <div className={thisUserNotifications?.length > 0 ? "this-user-notifications": ""}>
-                    {thisUserNotifications?.length>0? thisUserNotifications?.length : ""}
+                <div className={chat?.unreadMessages[user?._id] > 0 ? "this-user-notifications" : ""}>
+                    {chat?.unreadMessages[user?._id] > 0 ? chat?.unreadMessages[user?._id] : ""}
                 </div>
                 {!chat.is_group && otherUsers.some(user => isUserOnline(user._id)) && (
                     <span className="user-online"></span>

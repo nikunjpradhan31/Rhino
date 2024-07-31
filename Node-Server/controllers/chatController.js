@@ -29,7 +29,7 @@ const messageModel = require("../models/messageModel");
 const createChat = async (req, res) => {
     const { members, chatOwner} = req.body; // Expecting an array of strings
     if (members.length < 2) {
-        return res.status(400).json({ error: 'members must be an array with at least two user IDs' });
+        return res.status(400).json({ error: 'There must be two users to create a chat' });
     }
     let isgroup = false;
     if(members.length > 2){
@@ -43,7 +43,13 @@ const createChat = async (req, res) => {
 
         // Create a new chat with the given members
 
-        const newChat = new chatModel({ members: members, is_group: isgroup, chatOwner: chatOwner});
+        let unreadMessages = new Map();
+        members.forEach(member => {
+            unreadMessages.set(member, 0);
+        });
+
+        const newChat = new chatModel({ members: members, is_group: isgroup, chatOwner: chatOwner, unreadMessages: unreadMessages});
+
         const response = await newChat.save();
         res.status(200).json(response);
     } catch (error) {
@@ -116,6 +122,7 @@ const AddToChat = async (req, res) => {
         }
         chat.members.push(newMemberId);
 
+        chat.unreadMessages.set(newMemberId, 0);
         if(chat.members.length > 2){
             chat.is_group = true;
         }
@@ -203,6 +210,7 @@ const LeaveChat = async (req, res) => {
         if(chat.members.length <= 2){
             return res.status(400).json({ error: "Chat cannot have less than 2 users, please message chat owner to delete chat" });
         }
+        chat.unreadMessages.delete(userId);
         chat.members = chat.members.filter(id => id !== userId);
         await chat.save();
         res.status(200).json(chat);

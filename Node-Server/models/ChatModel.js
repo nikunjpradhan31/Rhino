@@ -5,7 +5,7 @@ const chatSchema = new mongoose.Schema({
     chatTitle: {type: String, required: false},
     is_group: { type: Boolean, default: false },
     chatOwner: {type:String, required: true},
-    //unreadMessages: { type: Map, of: Number, default: {} }
+    unreadMessages: { type: Map, of: Number, default: {} }
 
 },
 {

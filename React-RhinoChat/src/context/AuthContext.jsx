@@ -1,7 +1,6 @@
-import {createContext, useCallback, useEffect, useState} from "react";
+import {createContext, useCallback, useContext, useEffect, useState} from "react";
 import { baseUrl, postRequest } from "../utils/services";
 import { useNavigate } from 'react-router-dom';
-
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({children}) =>{

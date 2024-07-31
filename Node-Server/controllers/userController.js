@@ -61,7 +61,7 @@ const registerUser = async (req, res) => {
             text: `Hi! There, You have recently visited 
                    our website and entered your email.
                    Please follow the given link to verify your email:
-                   http://localhost:${config.port}/verify/${emailToken} 
+                   http://localhost:5000/verify/${emailToken} 
                    Thanks`
         };
 
@@ -97,7 +97,6 @@ const registerUser = async (req, res) => {
     //     res.status(500).json("Internal server error");
     // }
 };
-
 
 const createToken = (_id) => {
     const jwtkey = process.env.JWT_KEY;
@@ -159,9 +158,24 @@ const getUsers = async(req,res) => {
         const user = await userModel.find();
         res.status(200).json(user);
     }
-    catch{
+    catch(error){
         res.status(500).json(error);
 
     }
 };
-module.exports = { registerUser, loginUser, findUser, getUsers, findSingleUser};
+
+const searchUsers = async(req,res) => {
+    const searchString = req.params.searchString;
+    try{
+        const users = await userModel.find();
+        let filtered = [];
+        if (searchString.trim()) {
+            filtered = users.filter(user =>
+                user.username.toLowerCase().includes(searchString.toLowerCase()));
+        }
+        res.status(200).json(filtered);
+    }catch(error){
+        res.status(500).json(error);
+    }
+};
+module.exports = { registerUser, loginUser, findUser, getUsers, findSingleUser, searchUsers };
