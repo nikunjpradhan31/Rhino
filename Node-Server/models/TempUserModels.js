@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     },
     {
     timestamps:true,
+    
 });
 
 const TempUserModel = mongoose.model("TempUser", userSchema);

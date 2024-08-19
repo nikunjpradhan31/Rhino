@@ -78,6 +78,16 @@ const registerUser = async (req, res) => {
         tempUser = new TempUserModel({ username, email, password: hashedPassword, emailToken });
 
         await tempUser.save();
+        console.log(tempUser._id);
+        setTimeout(async () => {
+            try {
+              await TempUserModel.deleteOne({ _id: tempUser._id });
+              console.log('Document deleted after one minute');
+            } catch (deleteErr) {
+              console.error('Error deleting document:', deleteErr);
+            }
+          }, 600000); // 60000 milliseconds = 1 minute
+
 
         res.status(200).json({ message: "Registration successful. Please verify your email.", verificationRequired: true });
     } catch (error) {
@@ -129,7 +139,12 @@ const findUser = async(req,res) => {
     const userId = req.params.userId;
     try{
         const user = await userModel.findById(userId);
-        res.status(200).json(user);
+        const filteredUser = {
+            username: user.username,
+            _id: user._id,
+            email: user.email
+        };
+        res.status(200).json(filteredUser);
     }
     catch(error){
         res.status(500).json(error);
@@ -137,32 +152,32 @@ const findUser = async(req,res) => {
     }
 };
 
-const findSingleUser = async(req,res) => {
-    const username = req.params.username;
-    try{
-        const user = await userModel.findOne({ username });
-        if(!user){
-           return res.status(400).json("User does not exist");
-        }
-        return res.status(200).json(user);
-    }
-    catch(error){
-        console.log("Error",error);
-        return res.status(500).json(error);
+// const findSingleUser = async(req,res) => {
+//     const username = req.params.username;
+//     try{
+//         const user = await userModel.findOne({ username });
+//         if(!user){
+//            return res.status(400).json("User does not exist");
+//         }
+//         return res.status(200).json(user);
+//     }
+//     catch(error){
+//         console.log("Error",error);
+//         return res.status(500).json(error);
 
-    }
-};
+//     }
+// };
 
-const getUsers = async(req,res) => {
-    try{
-        const user = await userModel.find();
-        res.status(200).json(user);
-    }
-    catch(error){
-        res.status(500).json(error);
+// const getUsers = async(req,res) => {
+//     try{
+//         const user = await userModel.find();
+//         res.status(200).json(user);
+//     }
+//     catch(error){
+//         res.status(500).json(error);
 
-    }
-};
+//     }
+// };
 
 const searchUsers = async(req,res) => {
     const searchString = req.params.searchString;
@@ -173,9 +188,17 @@ const searchUsers = async(req,res) => {
             filtered = users.filter(user =>
                 user.username.toLowerCase().includes(searchString.toLowerCase()));
         }
-        res.status(200).json(filtered);
+        const filteredUsers = filtered.map(user => {
+            return {
+              username: user.username,
+              _id: user._id,
+              email: user.email
+            };
+          });
+
+        res.status(200).json(filteredUsers);
     }catch(error){
         res.status(500).json(error);
     }
 };
-module.exports = { registerUser, loginUser, findUser, getUsers, findSingleUser, searchUsers };
+module.exports = { registerUser, loginUser, findUser, searchUsers };
