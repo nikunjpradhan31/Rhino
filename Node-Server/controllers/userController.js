@@ -40,7 +40,6 @@ const registerUser = async (req, res) => {
         if (user) {
             return res.status(400).json("User with given username or email already exists");
         }
-
         // Email Verification
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -64,7 +63,7 @@ const registerUser = async (req, res) => {
                    http://localhost:5000/verify/${emailToken} 
                    Thanks`
         };
-
+// https://b5wj73nk-5000.use2.devtunnels.ms
         transporter.sendMail(mailConfig, function(error, info) {
             if (error) {
                 console.error('Error sending email:', error); // Log the error for debugging
@@ -84,7 +83,8 @@ const registerUser = async (req, res) => {
               await TempUserModel.deleteOne({ _id: tempUser._id });
               console.log('Document deleted after one minute');
             } catch (deleteErr) {
-              console.error('Error deleting document:', deleteErr);
+                return res.status(500).json("Error storing User");
+
             }
           }, 600000); // 60000 milliseconds = 1 minute
 

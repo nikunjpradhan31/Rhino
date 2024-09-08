@@ -32,7 +32,7 @@ export const ChatContextProvider = ({children,user}) => {
     const [onlineUsers, setOnlineUsers] = useState([]);
     useEffect (()=> {
        const newSocket = io("http://localhost:3000");
-        //const newSocket = io("https://2v3bf66x-3000.use.devtunnels.ms/");
+       // const newSocket = io("https://b5wj73nk-3000.use2.devtunnels.ms/");
 
         setSocket(newSocket);
         return () =>{

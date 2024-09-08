@@ -1,7 +1,7 @@
 const {Server} = require("socket.io");
 
 const io = new Server({cors: "http://localhost:5173"});
-//const io = new Server({cors: "https://2v3bf66x-5173.use.devtunnels.ms"});
+//const io = new Server({cors: "https://b5wj73nk-5173.use2.devtunnels.ms/"});
 
 
 let onlineUsers = [];
@@ -10,6 +10,8 @@ io.on("connection", (socket) => {
     console.log(socket.id);
 
     socket.on("addNewUser", (userId)=>{
+        if(!userId)
+            return;
         !onlineUsers.some((user) =>user.userId === userId) &&
         onlineUsers.push({
             userId,
