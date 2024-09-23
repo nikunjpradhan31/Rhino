@@ -2,9 +2,11 @@ const mongoose = require("mongoose");
 
 
 const messageSchema = new mongoose.Schema({
-    chatId: String,
-    senderId: String,
-    text: String,
+    chatId: { type: String, required: true },
+    senderId: { type: String, required: true },
+    text: { type: String, required: true },
+    fileId: { type: String }, 
+    hasFile: { type: Boolean },
     },
     {
     timestamps: true,

@@ -1,5 +1,5 @@
 import { createContext , useState, useEffect, useCallback} from "react";
-import { baseUrl, getRequest, postRequest , getRequestUser, putRequest, deleteRequest} from "../utils/services";
+import { baseUrl, getRequest, postRequest , postRequestFormData, putRequest, deleteRequest} from "../utils/services";
 import { io } from "socket.io-client";
 export const ChatContext = createContext();
 
@@ -26,6 +26,8 @@ export const ChatContextProvider = ({children,user}) => {
     //const [isAllUsersLoading, setIsAllUsersLoading] = useState(false);
     //const [allUsersError, setAllUsersError] = useState(null);
     const [notifications, setNotifications] = useState([]);
+    const [currentFileToUpload, setCurrentFileToUpload] = useState(null);
+
     
 
     const [socket, setSocket] = useState(null);
@@ -104,8 +106,20 @@ export const ChatContextProvider = ({children,user}) => {
         getUserChats();
     },[user,notifications]);
 
+    const getUserChats = useCallback(async()=>{
+        if(user?._id){
+            setIsUserChatsLoading(true);
+            setUserChatsError(null);
+            const response = await getRequest(`${baseUrl}/chats/${user?._id}`);
+            setIsUserChatsLoading(false);
+            if(response.error){
+                return setUserChatsError(response);
+            }
+            setUserChats(response);
+        }
+    },[]);
 
-      const AddToChat = useCallback(async(chatId, newMemberId)=>{
+    const AddToChat = useCallback(async(chatId, newMemberId)=>{
 
         if(chatId !== null && newMemberId !==null){
         const response = await putRequest(`${baseUrl}/chats/add/${newMemberId}/${chatId}`);
@@ -176,6 +190,52 @@ export const ChatContextProvider = ({children,user}) => {
     }
     },[user]);
 
+    const downloadFile = useCallback(async (fileId) => {
+        if (fileId) {
+            try {
+                const response = await fetch(`${baseUrl}/messages/file/${fileId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/octet-stream', // Optional header
+                    },
+                });
+    
+                if (!response.ok) {
+                    console.log("Unable to Download Image");
+                    return; // Exit if the response is not OK
+                }
+    
+                const blob = await response.blob(); // Create a blob from the response
+                const url = window.URL.createObjectURL(blob); // Create an object URL
+    
+                const link = document.createElement('a'); // Create a link element
+                link.href = url;
+                link.download = `file_${fileId}`; // Customize the filename
+                document.body.appendChild(link); // Append to body
+                link.click(); // Programmatically click the link
+                document.body.removeChild(link); // Clean up
+    
+                window.URL.revokeObjectURL(url); // Free up memory
+            } catch (error) {
+                console.error("Error downloading file:", error);
+            }
+        }
+    }, [baseUrl]); 
+
+
+    const handleGetFile = useCallback(async (event) => {
+        const file = event.target.files[0];
+        const maxFileSize = 8 * 1024 * 1024; // 8 MB in bytes
+    
+        if (file) {
+            if (file.size > maxFileSize) {
+                alert("The file is too large. Please select a file smaller than 10 MB.");
+                return;
+            }
+            setCurrentFileToUpload(file);
+        }
+    }, []);
+
     const changeChatTitle = useCallback(async (currentChat, chatTitle )=>{
         if(currentChat?.chatOwner === user?._id && currentChat?.is_group){
             const response = await putRequest(`${baseUrl}/chats/changeName/${chatTitle}/${currentChat._id}`);
@@ -183,6 +243,12 @@ export const ChatContextProvider = ({children,user}) => {
                 return console.log("Error");
             }
             updateCurrentChat(response);
+            setUserChats((prevChats) => 
+                prevChats.map((chat) =>
+                    chat._id === response._id ? { ...chat, ...response } : chat
+                )
+            );
+
         }
     },[user]);
 
@@ -218,7 +284,7 @@ export const ChatContextProvider = ({children,user}) => {
         const getMessages = async()=>{
             setMessagesLoading(true);
             setMessagesError(null);
-                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}/${user?._id}`);
+                const response = await getRequest(`${baseUrl}/messages/getmessages/${currentChat?._id}/${user?._id}`);
                 setMessagesLoading(false);
                 if(response.error){
                     return setMessagesError(response);
@@ -229,24 +295,54 @@ export const ChatContextProvider = ({children,user}) => {
     }
     },[currentChat,user]);
 
-    const sendMessage = useCallback( async (textMessage, sender, currentChatId, setTextMessage)=> {
-        if(!textMessage) return;
+    // const sendMessage = useCallback( async (textMessage, sender, currentChatId, setTextMessage, currentFileToUpload)=> {
+    //     if(!textMessage) return;
 
-        const response = await postRequest(`${baseUrl}/messages`, JSON.stringify({
-            senderId: sender._id,
-            text: textMessage,
-            chatId: currentChatId
-        }))
-        if(response.error){
+    //     const response = await postRequest(`${baseUrl}/messages`, JSON.stringify({
+    //         senderId: sender._id,
+    //         text: textMessage,
+    //         chatId: currentChatId
+    //     }))
+    //     if(response.error){
+    //         return setTextMessageError(response);
+    //     }
+    //     setNewMessage(response);
+    //     Setmessages((prev)=>[...prev, response]);
+    //     setTextMessage("");
+    //     setCurrentFileToUpload(null);
+
+
+
+    // },[]);
+
+    const sendMessage = useCallback(async (textMessage, sender, currentChatId, setTextMessage) => {
+        if (!textMessage) return;
+    
+        const formData = new FormData();
+        formData.append('senderId', sender._id);
+        formData.append('chatId', currentChatId);
+        formData.append('text', textMessage);
+
+        if (currentFileToUpload) {
+            formData.append('file', currentFileToUpload);
+        }
+        const response = await postRequestFormData(`${baseUrl}/messages/`, formData );
+    
+        if (response.error) {
             return setTextMessageError(response);
         }
+        
         setNewMessage(response);
         Setmessages((prev)=>[...prev, response]);
         setTextMessage("");
-
-
-
-    },[]);
+        setCurrentFileToUpload(null);
+        // setUserChats((prevChats) => 
+        //     prevChats.map((chat) =>
+        //         chat._id === response._id ? { ...chat, ...response } : chat
+        //     )
+        // );
+        }, [currentFileToUpload]);
+    
 
     const markThisUserNotifAsRead = useCallback((thisUserNotifications, notifications)=>{
         const mNotifications = notifications.map(el=> {
@@ -286,6 +382,7 @@ export const ChatContextProvider = ({children,user}) => {
             changeChatTitle,
             deleteGroupChat,
             leaveGroupChat,
+            getUserChats,
 
             filteredUsers,
             selectedUsers,
@@ -300,5 +397,10 @@ export const ChatContextProvider = ({children,user}) => {
             SearchForUsersToAdd,
             setSelectedUser,
             setFilteredUsersAdd,
+
+            downloadFile,
+            handleGetFile,
+            currentFileToUpload,
+            setCurrentFileToUpload
         }}>{children}</ChatContext.Provider>);
 }

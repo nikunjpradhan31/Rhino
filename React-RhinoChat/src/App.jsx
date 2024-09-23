@@ -2,6 +2,7 @@ import{Routes, Route, Navigate} from "react-router-dom"
 import ChatPage from "./pages/Chat";
 import RegisterPage from "./pages/Register";
 import LoginPage from "./pages/Login";
+import SettingsPage from "./pages/Settings";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {Container} from "react-bootstrap";
 import NavBar from "./components/Navbar";
@@ -21,6 +22,7 @@ function App() {
      <Route path = "/" element = {user ? <ChatPage/> : <LoginPage/>} /> 
      <Route path = "/register" element = {user ? <ChatPage/> : <RegisterPage/>} /> 
      <Route path = "/login" element = {user ? <ChatPage/>: <LoginPage/>} /> 
+     <Route path = "/settings" element = {user ? <SettingsPage/>: <LoginPage/>} /> 
      <Route path = "*" element = {<Navigate to="/"/>} /> 
 
   </Routes>

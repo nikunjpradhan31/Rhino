@@ -1,15 +1,16 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Form, Button, InputGroup, Stack } from 'react-bootstrap';
+import Select from 'react-select'; 
+import { Button, Stack } from 'react-bootstrap';
 import { ChatContext } from '../../context/ChatContext';
 import { AuthContext } from '../../context/AuthContext';
-import { getRequest, baseUrl } from '../../utils/services';
+
 const SearchOtherUsers = () => {
     const { user } = useContext(AuthContext);
-    const {isNewUserLoading, createChat, userChats, filteredUsers, selectedUsers, FilteredUsersLoading, SearchForUsers , setSelectedUsers, setFilteredUsers} = useContext(ChatContext);
+    const { isNewUserLoading, createChat, userChats, filteredUsers, selectedUsers, FilteredUsersLoading, SearchForUsers, setSelectedUsers, setFilteredUsers } = useContext(ChatContext);
     const [SearchString, setUsername] = useState("");
 
-    const handleInputChange = (e) => {
-        setUsername(e.target.value);
+    const handleSearchChange = (inputValue) => {
+        setUsername(inputValue);
     };
 
     const handleSearchClick = async (e) => {
@@ -30,72 +31,76 @@ const SearchOtherUsers = () => {
         }
     };
 
-
     useEffect(() => {
         SearchForUsers(SearchString);
     }, [SearchString]);
 
-
-
-    const handleUserSelect = (user) => {
-        setSelectedUsers(prevSelectedUsers => 
-            prevSelectedUsers.some(selectedUser => selectedUser._id === user._id)
-                ? prevSelectedUsers
-                : [...prevSelectedUsers, user]
-        );        
-        setUsername("");
-        setFilteredUsers([]);
-
+    const handleUserSelect = (selectedOptions) => {
+        setSelectedUsers(selectedOptions ? selectedOptions.map(option => option.value) : []);
     };
 
-    const handleUserRemove = (userId) => {
-        setSelectedUsers(prevSelectedUsers =>
-            prevSelectedUsers.filter(user => user._id !== userId)
-        );
+    const getOptionsFromUsers = (users) => {
+        return users.map(user => ({
+            value: user,
+            label: user.username
+        }));
     };
 
     return (
-        <Stack direction='horizontal'>
-        <Stack direction= "horizontal">
-            <InputGroup className="mb-3" style={{width: '30vh'}}>
-                <Form.Control
-                    type="text"
-                    placeholder={isNewUserLoading ? "Retrieving user..." : "Search Users"}
-                    value={SearchString}
-                    onChange={handleInputChange}
+        <Stack direction='horizontal' style={{ width: '30vh', justifyContent: 'flex-start' }}>
+            <div style={{ flex: '1' }}>
+                <Select
+                    isMulti
+                    options={getOptionsFromUsers(filteredUsers)} // Display the filtered users as options
+                    onChange={handleUserSelect}
+                    onInputChange={handleSearchChange}
+                    value={getOptionsFromUsers(selectedUsers)} // Display the selected users as tags
+                    isLoading={isNewUserLoading} // Shows loading spinner if users are being fetched
+                    placeholder="Search Users..."
+                    noOptionsMessage={() => isNewUserLoading ? "Retrieving user..." : "No users found"}
+                    components={{ DropdownIndicator: () => null, IndicatorSeparator: () => null }} 
+                    styles={{
+                        control: (provided) => ({
+                            ...provided,
+                            border: '1px solid #ced4da',
+                            borderRadius: '0.375rem',
+                            minHeight: '38px',
+                            display: 'flex',
+                        }),
+                        multiValue: (provided) => ({
+                            ...provided,
+                            backgroundColor: '#007bff',
+                            color: '#fff',
+                        }),
+                        multiValueLabel: (provided) => ({
+                            ...provided,
+                            color: '#fff',
+                        }),
+                        multiValueRemove: (provided) => ({
+                            ...provided,
+                            color: '#fff',
+                            cursor: 'pointer',
+                            ':hover': {
+                                backgroundColor: '#0056b3',
+                                color: 'white',
+                            },
+                        }),
+                        option: (provided) => ({
+                            ...provided,
+                            color: 'black', // Set the text color of filtered users to black
+                        }),
+                    }}
                 />
-                <Button
-                    variant="primary"
-                    onClick={handleSearchClick}
-                    disabled={selectedUsers.length === 0}
-                >
-                    Search
-                </Button>
-                {filteredUsers.length > 0 && (
-                <ul className="list-group" style={{width: '30vh',zIndex: 10, position: 'absolute',top:"100%"}}>
-                    {filteredUsers.map(user => (
-                        <li
-                            key={user._id}
-                            className="list-group-item"
-                            onClick={() => handleUserSelect(user)}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            {user.username}
-                        </li>
-                    ))}
-                </ul>
-            )}
-            </InputGroup>
-            </Stack>
-            <Stack direction = "vertical" style={{flexDirection: 'row'}}>
-                {selectedUsers.map(user => (
-                    <div key={user._id} className="single-user" onClick={() => handleUserRemove(user._id)}
->
-                        {user.username}
-                    </div>
-                ))}
-            </Stack>
-
+            </div>
+            <Button
+                variant="primary"
+                onClick={handleSearchClick}
+                disabled={selectedUsers.length === 0}
+                className="ms-2"
+                style={{ whiteSpace: 'nowrap' }}
+            >
+                Create Chat
+            </Button>
         </Stack>
     );
 };

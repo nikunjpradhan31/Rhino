@@ -9,7 +9,7 @@ export const useFetchLatestMessage = (chat) => {
 
     useEffect(() => {
         const getMessages = async () => {
-            const response = await getRequest(`${baseUrl}/messages/${chat?._id}`);
+            const response = await getRequest(`${baseUrl}/messages/lastmessage/${chat?._id}`);
             if (response && !response.error) {
                 setLatestMessage(response);
             }
