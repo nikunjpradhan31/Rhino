@@ -104,20 +104,21 @@ export const ChatContextProvider = ({children,user}) => {
             }
         }
         getUserChats();
-    },[user,notifications]);
+    },[user,notifications,messages]);
 
-    const getUserChats = useCallback(async()=>{
-        if(user?._id){
-            setIsUserChatsLoading(true);
-            setUserChatsError(null);
-            const response = await getRequest(`${baseUrl}/chats/${user?._id}`);
-            setIsUserChatsLoading(false);
-            if(response.error){
-                return setUserChatsError(response);
-            }
-            setUserChats(response);
-        }
-    },[]);
+    // const getUserChats = useCallback(async()=>{
+    //     if(user?._id){
+    //         setIsUserChatsLoading(true);
+    //         setUserChatsError(null);
+    //         const response = await getRequest(`${baseUrl}/chats/${user?._id}`);
+    //         setIsUserChatsLoading(false);
+    //         if(response.error){
+    //             return setUserChatsError(response);
+    //         }
+    //         console.log("here")
+    //         setUserChats(response);
+    //     }
+    // },[]);
 
     const AddToChat = useCallback(async(chatId, newMemberId)=>{
 
@@ -133,7 +134,6 @@ export const ChatContextProvider = ({children,user}) => {
         );
         }
     },[]);
-
 
     const SearchForUsers = useCallback(async(SearchString)=>{
             if( SearchString.length > 0){
@@ -336,11 +336,9 @@ export const ChatContextProvider = ({children,user}) => {
         Setmessages((prev)=>[...prev, response]);
         setTextMessage("");
         setCurrentFileToUpload(null);
-        // setUserChats((prevChats) => 
-        //     prevChats.map((chat) =>
-        //         chat._id === response._id ? { ...chat, ...response } : chat
-        //     )
-        // );
+
+
+        
         }, [currentFileToUpload]);
     
 
@@ -382,7 +380,6 @@ export const ChatContextProvider = ({children,user}) => {
             changeChatTitle,
             deleteGroupChat,
             leaveGroupChat,
-            getUserChats,
 
             filteredUsers,
             selectedUsers,

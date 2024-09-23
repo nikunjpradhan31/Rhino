@@ -3,7 +3,7 @@ import { ChatContext } from "../context/ChatContext";
 import { baseUrl, getRequest } from "../utils/services";
 import { AuthContext } from "../context/AuthContext";
 export const useFetchLatestMessage = (chat) => {
-    const { newMessage, notifications } = useContext(ChatContext);
+    const { newMessage, notifications ,messages} = useContext(ChatContext);
     const [latestMessage, setLatestMessage] = useState(null);
     const {user} = useContext(AuthContext);
 
@@ -18,7 +18,7 @@ export const useFetchLatestMessage = (chat) => {
         if (chat?._id) {
             getMessages();
         }
-    }, [chat?._id, newMessage, notifications, user]);
+    }, [chat?._id, newMessage, notifications, user,messages]);
 
     return { latestMessage };
 };
