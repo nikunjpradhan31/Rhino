@@ -4,6 +4,7 @@
 
 const chatModel = require("../models/ChatModel");
 const messageModel = require("../models/messageModel");
+const fileModel = require("../models/FileModel");
 
 //creating a new chat between two users
 // const createChat = async(req, res) => {
@@ -184,6 +185,7 @@ const DeleteChat = async (req, res) => {
 
         await chatModel.findByIdAndDelete(chatId);
         await messageModel.deleteMany({chatId: chatId});
+        await fileModel.deleteMany({chatId: chatId});
         return res.status(200).json({ message: "Chat successfully deleted" });
     } catch (error) {
         return res.status(500).json({ error: error.message });

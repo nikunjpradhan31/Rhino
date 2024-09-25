@@ -18,6 +18,7 @@ const createMessage = async (req,res) => {
             fileName: file.originalname,
             mimeType: file.mimetype,
             size: file.size, 
+            chatId: chatId,
         });
     }
 

@@ -258,7 +258,7 @@ export const ChatContextProvider = ({children,user}) => {
             if(response.error){
                 return console.log("Error");
             }
-            updateCurrentChat([]);
+            updateCurrentChat(null);
         }
     },[user]);
 
@@ -268,7 +268,7 @@ export const ChatContextProvider = ({children,user}) => {
             if(response.error){
                 return console.log("Error");
             }
-            updateCurrentChat([]);
+            updateCurrentChat(null);
         }
     },[user]);
 

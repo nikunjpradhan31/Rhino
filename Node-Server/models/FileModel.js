@@ -5,6 +5,7 @@ const fileSchema = new mongoose.Schema({
     file : {type: Buffer, required: true },
     fileName : {type: String, required: true },
     mimeType: { type: String, required: true },
+    chatId: {type: String, requred: true},
     size: { type: Number, required: true },
     },
     {
