@@ -196,26 +196,28 @@ export const ChatContextProvider = ({children,user}) => {
                 const response = await fetch(`${baseUrl}/messages/file/${fileId}`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/octet-stream', // Optional header
+                        'Content-Type': 'application/octet-stream',
                     },
                 });
     
                 if (!response.ok) {
                     console.log("Unable to Download Image");
-                    return; // Exit if the response is not OK
+                    return; 
                 }
+                
+                console.log(response);
+                
+                const blob = await response.blob(); 
+                const url = window.URL.createObjectURL(blob); 
     
-                const blob = await response.blob(); // Create a blob from the response
-                const url = window.URL.createObjectURL(blob); // Create an object URL
-    
-                const link = document.createElement('a'); // Create a link element
+                const link = document.createElement('a'); 
                 link.href = url;
-                link.download = `file_${fileId}`; // Customize the filename
-                document.body.appendChild(link); // Append to body
-                link.click(); // Programmatically click the link
-                document.body.removeChild(link); // Clean up
+                link.download = `file_${fileId}`; 
+                document.body.appendChild(link); 
+                link.click(); 
+                document.body.removeChild(link); 
     
-                window.URL.revokeObjectURL(url); // Free up memory
+                window.URL.revokeObjectURL(url); 
             } catch (error) {
                 console.error("Error downloading file:", error);
             }

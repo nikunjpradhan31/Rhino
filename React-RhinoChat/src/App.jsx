@@ -29,7 +29,6 @@ function App() {
 
   </Container>
   <BottomBar/>
-
   </ChatContextProvider>
   );
 }

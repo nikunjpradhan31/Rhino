@@ -14,24 +14,28 @@ const UserChat = ({ chat, user }) => {
     const unreadNotifications = unreadNotificationsFunc(notifications);
     const thisUserNotifications = unreadNotifications?.filter(not=>not.chatId ==chat?._id);
     const truncateText = (text) => {
-        let shortText = text.substring(0, 20);
-        if(text.length>20){
-            shortText = shortText + "...";
-        }
-        return shortText;
+        if (!text) return ""; // Handle null or undefined text
+        let shortText = text.substring(0, 15);
+        return text.length > 15 ? `${shortText}...` : shortText;
     };
-
+    
     const renderUsernames = () => {
         if (Array.isArray(otherUsers) && otherUsers.length > 0) {
             if (chat.is_group) {
-                return chat.chatTitle || otherUsers.map((user, index) => (
-                    <span key={user._id}>
-                        {user.username}
-                        {index < otherUsers.length - 1 && ", "}
-                    </span>
-                ));
+                return chat.chatTitle ? (
+                    <span>{truncateText(chat.chatTitle)}</span>
+                ) : (
+                    otherUsers.map((user, index) => (
+                        <span key={user._id}>
+                            {truncateText(user.username)}
+                            {index < otherUsers.length - 1 && ", "}
+                        </span>
+                    ))
+                );
             }
-            return otherUsers.map(user => <span key={user._id}>{user.username}</span>);
+            return otherUsers.map((user) => (
+                <span key={user._id}>{truncateText(user.username)}</span>
+            ));
         }
         return null;
     };

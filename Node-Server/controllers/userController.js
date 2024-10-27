@@ -1,4 +1,8 @@
 const userModel = require("../models/UserModels");
+const chatModel = require("../models/ChatModel");
+const fileModel = require("../models/FileModel");
+const messageModel = require("../models/messageModel");
+
 const TempUserModel = require("../models/TempUserModels");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -188,17 +192,181 @@ const searchUsers = async(req,res) => {
             filtered = users.filter(user =>
                 user.username.toLowerCase().includes(searchString.toLowerCase()));
         }
-        const filteredUsers = filtered.map(user => {
-            return {
-              username: user.username,
-              _id: user._id,
-              email: user.email
-            };
-          });
+        const filteredUsers = filtered
+        .filter(user => user.isActive !== false) 
+        .map(user => ({
+          username: user.username,
+          _id: user._id,
+          email: user.email
+        }));
 
         res.status(200).json(filteredUsers);
     }catch(error){
         res.status(500).json(error);
     }
 };
-module.exports = { registerUser, loginUser, findUser, searchUsers };
+
+const changeUserName = async(req,res) => {
+
+    const {user_id, newusername} = req.params
+    try{
+        if(!user_id || !newusername){
+           return res.status(400).json("Username not provided");
+        }
+
+        const existingUser = await userModel.findOne({ username: newusername });
+        if (existingUser) {
+            return res.status(400).json("Username already taken");
+        }
+
+        let user = await userModel.findOne({"_id": user_id});
+        if(!user) return res.status(400).json("User not found");
+
+        user.username = newusername;
+        await user.save();
+        
+        res.status(200).json(user);
+    }catch(error){
+        res.status(500).json(error);
+    }
+
+};
+
+const changePassword = async(req,res) => {
+
+    const {user_id, password, confirmpassword} = req.params
+    try{
+        if(!user_id || !password || !confirmpassword){
+           return res.status(400).json("All fields must be filled");
+
+        }
+        if (confirmpassword !== password) {
+            return res.status(400).json("Passwords must be the same");
+        }
+
+        if (!validator.isStrongPassword(password)) {
+            return res.status(400).json("Password must be a strong password");
+        }
+
+        let user = await userModel.findOne({"_id": user_id});
+        if(!user) return res.status(400).json("User not found");
+
+        const salt = await bcrypt.genSalt(10);
+        hashedPassword = await bcrypt.hash(password, salt);
+
+
+        user.password = hashedPassword;
+        await user.save();
+        
+        res.status(200).json(user);
+    }catch(error){
+        res.status(500).json(error);
+    }
+
+};
+
+const deleteAccount = async (req, res) => {
+    const { user_id, password } = req.params;
+
+    try {
+        if (!user_id) {
+            return res.status(400).json({ message: "User ID is not valid" });
+        }
+
+        if(!password){
+            return res.status(400).json({ message: "Please provide a password before proceeding" });
+
+        }
+     
+
+        const user = await userModel.findById(user_id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        
+        if(!isValidPassword) return res.status(400).json("Invalid password");   
+
+        // Anonymize the user data
+        user.email = `test${user._id}@test.com`;
+        user.password = user._id + "fjdskla2342987df29rfbsd";
+        user.username = `NaNuser_${Date.now()}`;
+        user.isActive = false;
+        
+        await user.save();
+
+        // Call chatDestroyer and await the result
+        const chatDeleted = await chatDestroyer(user_id);
+
+        if (chatDeleted) {
+            return res.status(200).json({ message: "Account deleted and chats cleared successfully" });
+        } else {
+            return res.status(500).json({ message: "Account deleted but failed to clear chats" });
+        }
+    } catch (error) {
+        console.error("Error in deleteAccount:", error);
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
+
+const chatDestroyer = async (user_id) => {
+    try {
+        const chats = await chatModel.find({
+            members: { $in: [user_id] }
+        });
+
+        for (const chat of chats) {
+            if (chat.chatOwner === user_id && chat.is_group) {
+                // Delete the chat, its messages, and files if the user is the owner and it's a group
+                const chatDelete = await chatModel.findByIdAndDelete(chat._id);
+                const messageDelete = await messageModel.deleteMany({ chatId: chat._id });
+                const fileDelete = await fileModel.deleteMany({ chatId: chat._id });
+                
+                if (!chatDelete || !messageDelete || !fileDelete) {
+                    throw new Error("Failed to delete chat or associated data");
+                }
+
+            } else if (chat.is_group) {
+                // Remove the user from the group chat and delete their unread messages
+                chat.unreadMessages.delete(user_id);
+                chat.members = chat.members.filter(id => id !== user_id);
+
+                const chatUpdate = await chat.save();
+                if (!chatUpdate) {
+                    throw new Error("Failed to update group chat after removing user");
+                }
+
+            } else if (!chat.is_group) {
+                // For one-on-one chat, delete if both users are inactive
+                const [user1, user2] = await userModel.find({ _id: { $in: chat.members } });
+                if (!user1.isActive && !user2.isActive) {
+                    const chatDelete = await chatModel.deleteOne({ _id: chat._id });
+                    if (!chatDelete) {
+                        throw new Error("Failed to delete inactive one-on-one chat");
+                    }
+                }
+            }
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error in chatDestroyer:", error);
+        return false;
+    }
+};
+
+// const updateExistingUsers = async () => {
+//     try {
+//         const result = await userModel.updateMany(
+//             { isActive: { $exists: false } },
+//             { $set: { isActive: true } }
+//         );
+
+//         console.log(`Updated ${result.nModified} users to have isActive: true`);
+//     } catch (error) {
+//         console.error("Error updating users:", error);
+//     }
+// };
+// updateExistingUsers();
+
+module.exports = { registerUser, loginUser, findUser, searchUsers, changeUserName, deleteAccount, changePassword };

@@ -95,10 +95,10 @@ const getFile = async (req, res) => {
         if (!fileEntry) {
             return res.status(404).json({ message: 'File not found' });
         }
-
         res.set('Content-Type', 'application/octet-stream'); // Set appropriate content type
+
         res.set('Content-Disposition', `attachment; filename="${fileEntry.fileName}"`); // Suggest a filename for download
-        res.send(fileEntry.file); // Send the file buffer in the response
+        res.send(fileEntry); // Send the file buffer in the response
     } catch (error) {
         console.error("File retrieval error:", error); // Log the error for debugging
         res.status(500).json({ message: 'Error retrieving file', error: error.message });
