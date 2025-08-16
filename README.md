@@ -1,4 +1,4 @@
-# Rhino Chat App 🚀
+# Rhino Chat 🚀
 
 **Real-time, secure, and seamless chatting—anytime, anywhere.**  
 
